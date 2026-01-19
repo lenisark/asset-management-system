@@ -203,44 +203,95 @@ INSERT INTO assets (
 
 ### 3.2 Storage 정책 설정
 
-#### 방법 1: UI에서 설정 (권장)
+⚠️ **중요**: 이미지 업로드/조회를 위해 반드시 정책을 설정해야 합니다!
+
+#### 방법 1: UI에서 설정 (권장, 초보자용)
 
 1. **"asset-images" 버킷 클릭**
 
 2. **"Policies" 탭 클릭**
+   - 현재 정책이 없으면 빈 화면이 표시됨
 
-3. **"New Policy" 클릭**
-
-4. **"For full customization" 선택**
-
-5. **정책 생성**
-
-   **Policy 1: Public Read (읽기)**
+3. **첫 번째 정책 생성: Public Read**
+   
+   a. **"New Policy" 버튼 클릭** (우측 상단)
+   
+   b. **"For full customization" 선택**
+   
+   c. **정책 정보 입력**:
    ```
    Policy name: Public read access
    Target roles: public
-   Operations: SELECT
-   Definition: true
+   Allowed operation: SELECT (체크)
+   Policy definition (USING): bucket_id = 'asset-images'
    ```
+   
+   d. **"Review" 클릭 → "Save policy" 클릭**
 
-   **Policy 2: Authenticated Upload (업로드)**
+4. **두 번째 정책 생성: Authenticated Upload**
+   
+   a. **다시 "New Policy" 버튼 클릭**
+   
+   b. **"For full customization" 선택**
+   
+   c. **정책 정보 입력**:
    ```
    Policy name: Authenticated upload
    Target roles: authenticated
-   Operations: INSERT
-   Definition: true
+   Allowed operation: INSERT (체크)
+   WITH CHECK: bucket_id = 'asset-images' AND auth.role() = 'authenticated'
+   ```
+   
+   d. **"Review" 클릭 → "Save policy" 클릭**
+
+5. **추가 정책 (선택사항)**
+   
+   로그인한 사용자가 **수정/삭제**도 할 수 있게 하려면:
+   
+   **Policy 3: Authenticated Update**
+   ```
+   Policy name: Authenticated update
+   Target roles: authenticated
+   Allowed operation: UPDATE
+   Policy definition: auth.role() = 'authenticated'
+   ```
+   
+   **Policy 4: Authenticated Delete**
+   ```
+   Policy name: Authenticated delete
+   Target roles: authenticated
+   Allowed operation: DELETE
+   Policy definition: auth.role() = 'authenticated'
    ```
 
-#### 방법 2: SQL로 설정
+#### 방법 2: SQL로 설정 (빠르고 정확함, 추천!)
+
+1. **좌측 메뉴에서 "SQL Editor" 클릭**
+
+2. **"New query" 버튼 클릭**
+
+3. **다음 SQL 복사 및 실행**
+   
+   GitHub에서 파일 확인: [supabase-storage-policies.sql](https://github.com/lenisark/asset-management-system/blob/main/supabase-storage-policies.sql)
 
 ```sql
--- SQL Editor에서 실행
--- Public read access
+-- ====================================
+-- Supabase Storage Policies
+-- asset-images 버킷에 대한 정책 설정
+-- ====================================
+
+-- 기존 정책 삭제 (있는 경우)
+DROP POLICY IF EXISTS "Public read access" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated upload" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated update" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated delete" ON storage.objects;
+
+-- Policy 1: Public Read (모두가 이미지를 볼 수 있음)
 CREATE POLICY "Public read access"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'asset-images');
 
--- Authenticated users can upload
+-- Policy 2: Authenticated Upload (로그인한 사용자만 업로드)
 CREATE POLICY "Authenticated upload"
 ON storage.objects FOR INSERT
 WITH CHECK (
@@ -248,22 +299,50 @@ WITH CHECK (
   AND auth.role() = 'authenticated'
 );
 
--- Users can update their own uploads
-CREATE POLICY "Users update own uploads"
+-- Policy 3: Authenticated Update (로그인한 사용자만 수정)
+CREATE POLICY "Authenticated update"
 ON storage.objects FOR UPDATE
 USING (
   bucket_id = 'asset-images' 
   AND auth.role() = 'authenticated'
 );
 
--- Users can delete their own uploads
-CREATE POLICY "Users delete own uploads"
+-- Policy 4: Authenticated Delete (로그인한 사용자만 삭제)
+CREATE POLICY "Authenticated delete"
 ON storage.objects FOR DELETE
 USING (
   bucket_id = 'asset-images' 
   AND auth.role() = 'authenticated'
 );
 ```
+
+4. **"Run" 버튼 클릭** (우측 하단)
+
+5. **성공 메시지 확인**
+   ```
+   Success. No rows returned
+   ```
+
+6. **정책 생성 확인**
+   ```sql
+   -- 이 쿼리를 실행하여 정책 확인
+   SELECT 
+     policyname, 
+     roles, 
+     cmd
+   FROM pg_policies 
+   WHERE tablename = 'objects'
+   AND schemaname = 'storage'
+   ORDER BY policyname;
+   ```
+   
+   결과:
+   ```
+   Authenticated delete    {authenticated}    DELETE
+   Authenticated update    {authenticated}    UPDATE
+   Authenticated upload    {authenticated}    INSERT
+   Public read access      {public}           SELECT
+   ```
 
 ### 3.3 Storage 설정 확인
 
