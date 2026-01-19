@@ -12,20 +12,26 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
 - 사용자별 접근 제어
 - 로그아웃 기능
 
-### ⚡ 2. 실시간 동기화
+### 🎨 2. 테마 전환
+- **다크/라이트 모드** 지원
+- 사용자 설정 localStorage 저장
+- 전체 UI에 일관된 테마 적용
+- 부드러운 전환 애니메이션
+
+### ⚡ 3. 실시간 동기화
 - **Supabase Realtime** 구독
 - 여러 사용자 동시 작업 지원
 - 자산 변경 시 자동 업데이트
 - 실시간 동기화 상태 표시
 
-### 📊 3. 대시보드 & 차트
+### 📊 4. 대시보드 & 차트
 - 전체 자산 현황 통계
 - **상태별 파이 차트** (사용가능, 사용중, 점검중)
 - **카테고리별 바 차트** (PC, Monitor, etc)
 - Chart.js 기반 인터랙티브 차트
 - 최근 등록 자산 목록
 
-### 📦 4. 자산 관리
+### 📦 5. 자산 관리
 - **자산 CRUD**: 등록, 조회, 수정, 삭제
 - **자산 정보**:
   - 자산명, 카테고리, 시리얼 번호
@@ -36,21 +42,32 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
   - 이름, 시리얼 번호, 제조사로 검색
   - 카테고리 및 상태별 필터
 
-### 📸 5. 자산 사진 업로드
+### 📸 6. 자산 사진 업로드
 - **Supabase Storage** 연동
 - 드래그앤드롭 이미지 업로드
 - 이미지 미리보기
 - 자산 상세 정보에서 이미지 표시
 - PNG, JPG 지원 (최대 5MB)
 
-### 📱 6. QR 코드 생성
+### 📱 7. QR 코드 생성
 - 각 자산에 대한 **QR 코드 자동 생성**
 - QR 코드에 자산 정보 인코딩
 - **다운로드** 및 **인쇄** 기능
 - 라벨 인쇄용 포맷팅
 - 모바일 스캔 지원
 
-### 🔄 7. 불출/입고 관리
+### 📊 8. Excel 내보내기/가져오기
+- **Excel 내보내기**:
+  - 자산 목록을 Excel 파일로 다운로드
+  - 거래 내역 Excel 내보내기
+  - 필터링된 목록도 내보내기 지원
+- **Excel 가져오기**:
+  - Excel 파일에서 대량 자산 등록
+  - 템플릿 파일 제공
+  - 유효성 검사 (필수 필드, 중복 체크)
+  - 오류 리포트 제공
+
+### 🔄 9. 불출/입고 관리
 - **불출 등록**: 직원에게 자산 배정
   - 담당자명, 부서, 날짜 기록
   - 자동 상태 변경 (→ 사용중)
@@ -59,10 +76,30 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
   - 자동 상태 변경 (→ 사용가능)
 - **이력 추적**: 각 자산별 완전한 이력 타임라인
 
-### 🔍 8. 자산 상세 정보
+### 🛠️ 10. 유지보수 스케줄 관리 (NEW!)
+- **유지보수 일정 등록**:
+  - 점검, 수리, 청소, 업그레이드 등 유형 분류
+  - 예정일, 담당자, 비용 기록
+- **스케줄 상태 관리**:
+  - 예정됨, 진행중, 완료, 취소 상태 관리
+  - 완료일 자동 기록
+- **자산별 이력 조회**:
+  - 각 자산의 유지보수 이력 타임라인
+  - 비용 통계 및 분석
+- **알림 기능**: 예정된 유지보수 일정 표시
+
+### 💰 11. 자산 감가상각 계산 (준비중)
+- **정액법 / 정률법** 감가상각 계산
+- 내용연수 및 잔존가치 설정
+- 연도별 감가상각비 자동 계산
+- 현재 자산 가치 추정
+- 회계 리포트 생성
+
+### 🔍 12. 자산 상세 정보
 - 전체 자산 정보 확인
 - 자산 이미지 표시
 - 불출/입고 이력 타임라인
+- 유지보수 이력 타임라인
 - QR 코드 생성 버튼
 - 이력에서 바로 불출/입고 등록
 
@@ -71,10 +108,11 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
 ### Frontend
 - **React 18** + TypeScript
 - **Vite** (번들러)
-- **Tailwind CSS** (스타일링)
+- **Tailwind CSS** (스타일링, 다크 모드)
 - **Lucide React** (아이콘)
 - **Chart.js** + react-chartjs-2 (차트)
 - **QRCode** (QR 코드 생성)
+- **XLSX** (SheetJS) (Excel 내보내기/가져오기)
 
 ### Backend (Supabase)
 - **Supabase PostgreSQL** (데이터베이스)
@@ -116,15 +154,22 @@ Supabase 대시보드 → SQL Editor에서 스크립트 실행
 `supabase-schema.sql` 파일 내용을 복사하여 실행
 
 ```sql
--- assets 테이블, transactions 테이블, 인덱스, RLS 정책 등 생성
+-- assets 테이블, transactions 테이블, maintenance_schedules 테이블, 인덱스, RLS 정책 등 생성
 ```
 
-#### 🔄 기존 데이터베이스가 있는 경우
+#### 🔄 기존 데이터베이스가 있는 경우 (v1.x → v2.0)
 `supabase-update.sql` 파일 내용을 복사하여 실행
 
 ```sql
 -- image_url 컬럼 추가 및 정책 업데이트
 -- 기존 데이터는 유지됩니다
+```
+
+#### 🛠️ 유지보수 스케줄 기능만 추가하는 경우
+`supabase-maintenance-update.sql` 파일 내용을 복사하여 실행
+
+```sql
+-- maintenance_schedules 테이블 생성 및 RLS 정책 설정
 ```
 
 **⚠️ 주의**: 
@@ -176,11 +221,26 @@ npm run preview
 2. 회원가입 또는 로그인
 3. 이메일 인증 (선택사항)
 
+### 테마 전환
+- 헤더 우측의 **달/해 아이콘** 클릭
+- 다크 모드 ↔ 라이트 모드 전환
+- 설정은 자동 저장됩니다
+
 ### 자산 등록
 1. 우측 상단 "자산 등록" 버튼
 2. 자산 정보 입력
 3. 이미지 업로드 (선택사항)
 4. "등록" 버튼
+
+### Excel로 대량 등록
+1. "템플릿 다운로드" 버튼으로 템플릿 받기
+2. Excel에서 자산 정보 입력
+3. "Excel 가져오기" 버튼으로 업로드
+4. 유효성 검사 후 자동 등록
+
+### 자산 내보내기
+- "Excel 내보내기" 버튼으로 현재 목록 다운로드
+- 필터링된 목록도 내보내기 가능
 
 ### 자산 불출
 1. 자산 목록에서 자산 선택 (눈 아이콘)
@@ -192,9 +252,16 @@ npm run preview
 2. "QR 코드" 버튼 클릭
 3. 다운로드 또는 인쇄
 
+### 유지보수 스케줄 등록 (NEW!)
+1. 자산 상세 정보 → "유지보수 예약" 버튼
+2. 유형(점검/수리/청소/업그레이드) 선택
+3. 예정일, 담당자, 비용 입력
+4. 상태 관리 (예정됨 → 진행중 → 완료)
+
 ### 대시보드 확인
 1. 상단 "대시보드" 탭
 2. 통계 및 차트 확인
+3. 최근 등록 자산 확인
 
 ## 📁 프로젝트 구조
 
@@ -203,19 +270,23 @@ asset-management-system/
 ├── src/
 │   ├── components/
 │   │   ├── Dashboard.tsx          # 대시보드 (차트 포함)
-│   │   ├── AssetList.tsx          # 자산 목록
+│   │   ├── AssetList.tsx          # 자산 목록 (Excel 기능)
 │   │   ├── AssetForm.tsx          # 자산 등록/수정 (이미지 업로드)
 │   │   ├── AssetDetail.tsx        # 자산 상세 정보
 │   │   ├── TransactionForm.tsx    # 불출/입고 폼
 │   │   ├── AuthPage.tsx           # 로그인/회원가입
 │   │   └── QRCodeModal.tsx        # QR 코드 모달
 │   ├── AuthContext.tsx            # 인증 컨텍스트
+│   ├── ThemeContext.tsx           # 테마 컨텍스트 (NEW!)
 │   ├── supabaseClient.ts          # Supabase 클라이언트
 │   ├── utils-supabase.ts          # Supabase CRUD 함수
+│   ├── utils-excel.ts             # Excel 내보내기/가져오기 (NEW!)
 │   ├── types.ts                   # TypeScript 타입
 │   ├── App.tsx                    # 메인 앱
 │   └── main.tsx                   # 엔트리 포인트
-├── supabase-schema.sql            # DB 스키마
+├── supabase-schema.sql            # DB 스키마 (전체)
+├── supabase-update.sql            # DB 업데이트 스크립트
+├── supabase-maintenance-update.sql # 유지보수 기능 추가 스크립트 (NEW!)
 ├── .env.example                   # 환경 변수 예제
 ├── package.json
 └── README.md
@@ -235,7 +306,7 @@ asset-management-system/
 - status (TEXT)           # 상태
 - location (TEXT)         # 위치
 - notes (TEXT)            # 비고
-- image_url (TEXT)        # 이미지 URL ⭐
+- image_url (TEXT)        # 이미지 URL
 - created_at (TIMESTAMP)  # 생성일
 - updated_at (TIMESTAMP)  # 수정일
 ```
@@ -250,6 +321,21 @@ asset-management-system/
 - date (DATE)             # 거래일
 - notes (TEXT)            # 비고
 - created_at (TIMESTAMP)  # 생성일
+```
+
+### `maintenance_schedules` 테이블 ⭐ NEW!
+```sql
+- id (UUID)               # 고유 ID
+- asset_id (UUID)         # 자산 ID (FK)
+- type (TEXT)             # inspection/repair/cleaning/upgrade/other
+- scheduled_date (DATE)   # 예정일
+- completed_date (DATE)   # 완료일
+- status (TEXT)           # scheduled/in-progress/completed/cancelled
+- assigned_to (TEXT)      # 담당자
+- notes (TEXT)            # 비고
+- cost (NUMERIC)          # 비용
+- created_at (TIMESTAMP)  # 생성일
+- updated_at (TIMESTAMP)  # 수정일
 ```
 
 ## 🔐 보안 설정
@@ -276,14 +362,20 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 ## 🎯 주요 개선 사항
 
-### v2.0 (현재)
+### v2.1 (2026-01-19) 🆕
+- ✅ **테마 전환** (다크/라이트 모드)
+- ✅ **Excel 내보내기/가져오기** (대량 자산 등록)
+- ✅ **유지보수 스케줄 관리** (점검, 수리, 청소, 업그레이드)
+- ✅ 감가상각 계산 인터페이스 (준비중)
+
+### v2.0 (2026-01)
 - ✅ 실시간 동기화
 - ✅ 사용자 인증
 - ✅ 이미지 업로드
 - ✅ QR 코드 생성
 - ✅ 대시보드 차트
 
-### v1.0 (초기)
+### v1.0 (2026-01 초기)
 - ✅ 기본 CRUD
 - ✅ 불출/입고 관리
 - ✅ 이력 추적
@@ -291,14 +383,15 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 ## 🚧 향후 계획
 
-- [ ] Excel 내보내기/가져오기
+- [ ] **유지보수 스케줄 UI 완성** (진행중)
+- [ ] **자산 감가상각 계산 UI 구현** (진행중)
 - [ ] 모바일 앱 (React Native)
 - [ ] 소셜 로그인 (Google, GitHub)
-- [ ] 자산 유지보수 스케줄
-- [ ] 자산 감가상각 계산
-- [ ] 이메일 알림
-- [ ] 다국어 지원
-- [ ] 테마 전환 (다크 모드)
+- [ ] 이메일 알림 (예정된 유지보수, 점검 알림)
+- [ ] 다국어 지원 (영어, 일본어)
+- [ ] PWA 지원 (오프라인 모드)
+- [ ] 보고서 생성 (PDF, Excel)
+- [ ] 자산 대여 시스템
 
 ## 📞 문의 및 지원
 
