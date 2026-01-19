@@ -37,3 +37,34 @@ export interface DashboardStats {
   maintenanceAssets: number;
   assetsByCategory: Record<AssetCategory, number>;
 }
+
+export type MaintenanceType = 'inspection' | 'repair' | 'cleaning' | 'upgrade' | 'other';
+export type MaintenanceStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+
+export interface MaintenanceSchedule {
+  id: string;
+  assetId: string;
+  assetName?: string; // join용
+  type: MaintenanceType;
+  scheduledDate: string;
+  completedDate?: string;
+  status: MaintenanceStatus;
+  assignedTo?: string;
+  notes?: string;
+  cost?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Depreciation {
+  assetId: string;
+  assetName: string;
+  purchasePrice: number;
+  purchaseDate: string;
+  usefulLife: number; // 내용연수 (년)
+  salvageValue: number; // 잔존가치
+  method: 'straight-line' | 'declining-balance'; // 정액법 | 정률법
+  currentValue: number; // 현재가치
+  accumulatedDepreciation: number; // 감가상각누계액
+  yearlyDepreciation: number[]; // 연도별 감가상각비
+}

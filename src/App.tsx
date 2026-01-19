@@ -3,18 +3,20 @@ import { Asset } from './types';
 import { getAssets, saveAsset, deleteAsset } from './utils-supabase';
 import { supabase, TABLES } from './supabaseClient';
 import { useAuth } from './AuthContext';
+import { useTheme } from './ThemeContext';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import AssetList from './components/AssetList';
 import AssetForm from './components/AssetForm';
 import AssetDetail from './components/AssetDetail';
 import TransactionForm from './components/TransactionForm';
-import { LayoutDashboard, Package, Plus, AlertCircle, Wifi, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Package, Plus, AlertCircle, Wifi, LogOut, User, Moon, Sun } from 'lucide-react';
 
 type View = 'dashboard' | 'assets';
 
 function App() {
   const { user, signOut, loading: authLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [showAssetForm, setShowAssetForm] = useState(false);
@@ -143,24 +145,24 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       {/* 헤더 */}
-      <header className="bg-white shadow-md">
+      <header className="bg-white dark:bg-gray-800 shadow-md transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 자산관리 시스템
               </h1>
               {/* 실시간 동기화 상태 */}
               <div className="flex items-center gap-1 text-sm">
                 {isRealtime ? (
-                  <div className="flex items-center gap-1 text-green-600 animate-pulse">
+                  <div className="flex items-center gap-1 text-green-600 dark:text-green-400 animate-pulse">
                     <Wifi className="w-4 h-4" />
                     <span>동기화 중</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-gray-400">
+                  <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
                     <Wifi className="w-4 h-4" />
                     <span>실시간</span>
                   </div>
@@ -169,10 +171,18 @@ function App() {
             </div>
             <div className="flex items-center gap-4">
               {/* 사용자 정보 */}
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <User className="w-4 h-4" />
                 <span>{user.email}</span>
               </div>
+              {/* 테마 전환 버튼 */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                title={theme === 'light' ? '다크 모드로 전환' : '라이트 모드로 전환'}
+              >
+                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </button>
               {/* 자산 등록 버튼 */}
               <button
                 onClick={handleNewAsset}
@@ -184,7 +194,7 @@ function App() {
               {/* 로그아웃 버튼 */}
               <button
                 onClick={signOut}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 로그아웃
@@ -197,12 +207,12 @@ function App() {
       {/* 에러 메시지 */}
       {error && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded">
             <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-              <p className="text-red-700">{error}</p>
+              <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 mr-2" />
+              <p className="text-red-700 dark:text-red-300">{error}</p>
             </div>
-            <p className="text-sm text-red-600 mt-2">
+            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
               .env 파일에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 설정해주세요.
             </p>
           </div>
@@ -210,15 +220,15 @@ function App() {
       )}
 
       {/* 네비게이션 */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             <button
               onClick={() => setCurrentView('dashboard')}
               className={`flex items-center gap-2 px-3 py-4 border-b-2 transition-colors ${
                 currentView === 'dashboard'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
               <LayoutDashboard className="w-5 h-5" />
@@ -228,8 +238,8 @@ function App() {
               onClick={() => setCurrentView('assets')}
               className={`flex items-center gap-2 px-3 py-4 border-b-2 transition-colors ${
                 currentView === 'assets'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
               <Package className="w-5 h-5" />
@@ -254,6 +264,7 @@ function App() {
                 onEdit={handleEditAsset}
                 onDelete={handleDeleteAsset}
                 onView={handleViewAsset}
+                onReload={loadAssets}
               />
             )}
           </>
@@ -298,9 +309,9 @@ function App() {
       )}
 
       {/* 푸터 */}
-      <footer className="bg-white border-t mt-12">
+      <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 mt-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             © 2024 자산관리 시스템. All rights reserved.
           </p>
         </div>

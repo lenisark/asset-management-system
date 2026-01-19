@@ -1,19 +1,23 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Asset, AssetCategory, AssetStatus } from '../types';
-import { Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Edit, Trash2, Eye, Download, Upload, FileSpreadsheet } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils';
+import { exportAssetsToExcel, importAssetsFromExcel, downloadAssetTemplate } from '../utils-excel';
 
 interface AssetListProps {
   assets: Asset[];
   onEdit: (asset: Asset) => void;
   onDelete: (id: string) => void;
   onView: (asset: Asset) => void;
+  onReload?: () => void; // 가져오기 후 목록 새로고침
 }
 
-const AssetList = ({ assets, onEdit, onDelete, onView }: AssetListProps) => {
+const AssetList = ({ assets, onEdit, onDelete, onView, onReload }: AssetListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<AssetCategory | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<AssetStatus | 'all'>('all');
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredAssets = assets.filter(asset => {
     const matchesSearch = 
@@ -27,12 +31,116 @@ const AssetList = ({ assets, onEdit, onDelete, onView }: AssetListProps) => {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // Excel 내보내기
+  const handleExport = () => {
+    const success = exportAssetsToExcel(filteredAssets);
+    if (success) {
+      alert('Excel 파일이 다운로드되었습니다.');
+    } else {
+      alert('Excel 내보내기에 실패했습니다.');
+    }
+  };
+
+  // Excel 템플릿 다운로드
+  const handleDownloadTemplate = () => {
+    const success = downloadAssetTemplate();
+    if (success) {
+      alert('템플릿 파일이 다운로드되었습니다.');
+    } else {
+      alert('템플릿 다운로드에 실패했습니다.');
+    }
+  };
+
+  // Excel 가져오기
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const result = await importAssetsFromExcel(file);
+      
+      if (result.success) {
+        let message = `${result.imported}개의 자산이 성공적으로 등록되었습니다.`;
+        if (result.errors.length > 0) {
+          message += `\n\n${result.errors.length}개의 오류가 발생했습니다:\n${result.errors.slice(0, 5).join('\n')}`;
+          if (result.errors.length > 5) {
+            message += `\n... 외 ${result.errors.length - 5}개`;
+          }
+        }
+        alert(message);
+        
+        // 목록 새로고침
+        if (onReload) {
+          onReload();
+        }
+      } else {
+        alert(`가져오기 실패:\n${result.errors.join('\n')}`);
+      }
+    } catch (error) {
+      console.error('Excel 가져오기 실패:', error);
+      alert('Excel 가져오기 중 오류가 발생했습니다.');
+    } finally {
+      setIsImporting(false);
+      // 파일 입력 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-gray-800">자산 목록</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">자산 목록</h2>
+        
+        {/* Excel 내보내기/가져오기 버튼 */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            title="자산 목록 Excel 다운로드"
+          >
+            <Download className="w-4 h-4" />
+            Excel 내보내기
+          </button>
+          
+          <button
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            title="Excel 템플릿 다운로드"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            템플릿 다운로드
+          </button>
+          
+          <button
+            onClick={handleImport}
+            disabled={isImporting}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Excel에서 자산 가져오기"
+          >
+            <Upload className="w-4 h-4" />
+            {isImporting ? '가져오는 중...' : 'Excel 가져오기'}
+          </button>
+          
+          {/* 숨겨진 파일 입력 */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
+      </div>
       
       {/* 검색 및 필터 */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />

@@ -31,30 +31,56 @@ CREATE TABLE IF NOT EXISTS transactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 유지보수 스케줄 테이블
+CREATE TABLE IF NOT EXISTS maintenance_schedules (
+  id UUID PRIMARY KEY,
+  asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('inspection', 'repair', 'cleaning', 'upgrade', 'other')),
+  scheduled_date DATE NOT NULL,
+  completed_date DATE,
+  status TEXT NOT NULL CHECK (status IN ('scheduled', 'in-progress', 'completed', 'cancelled')),
+  assigned_to TEXT,
+  notes TEXT,
+  cost NUMERIC,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_assets_status ON assets(status);
 CREATE INDEX IF NOT EXISTS idx_assets_category ON assets(category);
 CREATE INDEX IF NOT EXISTS idx_assets_serial_number ON assets(serial_number);
 CREATE INDEX IF NOT EXISTS idx_transactions_asset_id ON transactions(asset_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+CREATE INDEX IF NOT EXISTS idx_maintenance_asset_id ON maintenance_schedules(asset_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_scheduled_date ON maintenance_schedules(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_maintenance_status ON maintenance_schedules(status);
 
 -- RLS (Row Level Security) 활성화
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE maintenance_schedules ENABLE ROW LEVEL SECURITY;
 
 -- 기존 정책 삭제 (있는 경우)
 DROP POLICY IF EXISTS "Enable read access for all users" ON assets;
 DROP POLICY IF EXISTS "Enable read access for all users" ON transactions;
+DROP POLICY IF EXISTS "Enable read access for all users" ON maintenance_schedules;
 DROP POLICY IF EXISTS "Enable insert for all users" ON assets;
 DROP POLICY IF EXISTS "Enable insert for all users" ON transactions;
+DROP POLICY IF EXISTS "Enable insert for all users" ON maintenance_schedules;
 DROP POLICY IF EXISTS "Enable update for all users" ON assets;
+DROP POLICY IF EXISTS "Enable update for all users" ON maintenance_schedules;
 DROP POLICY IF EXISTS "Enable delete for all users" ON assets;
+DROP POLICY IF EXISTS "Enable delete for all users" ON maintenance_schedules;
 
 -- 모든 사용자가 읽기 가능
 CREATE POLICY "Enable read access for all users" ON assets
   FOR SELECT USING (true);
 
 CREATE POLICY "Enable read access for all users" ON transactions
+  FOR SELECT USING (true);
+
+CREATE POLICY "Enable read access for all users" ON maintenance_schedules
   FOR SELECT USING (true);
 
 -- 모든 사용자가 삽입 가능
@@ -64,12 +90,21 @@ CREATE POLICY "Enable insert for all users" ON assets
 CREATE POLICY "Enable insert for all users" ON transactions
   FOR INSERT WITH CHECK (true);
 
+CREATE POLICY "Enable insert for all users" ON maintenance_schedules
+  FOR INSERT WITH CHECK (true);
+
 -- 모든 사용자가 업데이트 가능
 CREATE POLICY "Enable update for all users" ON assets
   FOR UPDATE USING (true);
 
+CREATE POLICY "Enable update for all users" ON maintenance_schedules
+  FOR UPDATE USING (true);
+
 -- 모든 사용자가 삭제 가능
 CREATE POLICY "Enable delete for all users" ON assets
+  FOR DELETE USING (true);
+
+CREATE POLICY "Enable delete for all users" ON maintenance_schedules
   FOR DELETE USING (true);
 
 -- 자동 업데이트 시간 트리거 함수
@@ -85,6 +120,12 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS update_assets_updated_at ON assets;
 CREATE TRIGGER update_assets_updated_at
   BEFORE UPDATE ON assets
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_maintenance_updated_at ON maintenance_schedules;
+CREATE TRIGGER update_maintenance_updated_at
+  BEFORE UPDATE ON maintenance_schedules
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 

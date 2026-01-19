@@ -1,4 +1,4 @@
-import { Asset, Transaction } from './types';
+import { Asset, Transaction, MaintenanceSchedule } from './types';
 import { supabase, TABLES } from './supabaseClient';
 
 // 자산 관리
@@ -266,4 +266,124 @@ export const formatCurrency = (amount: number): string => {
     style: 'currency',
     currency: 'KRW'
   }).format(amount);
+};
+
+// ===== Maintenance Schedules =====
+
+// 유지보수 스케줄 목록 조회
+export const getMaintenanceSchedules = async (): Promise<MaintenanceSchedule[]> => {
+  const { data, error } = await supabase
+    .from(TABLES.MAINTENANCE_SCHEDULES)
+    .select('*')
+    .order('scheduled_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching maintenance schedules:', error);
+    return [];
+  }
+  
+  return (data || []).map(item => ({
+    id: item.id,
+    assetId: item.asset_id,
+    type: item.type,
+    scheduledDate: item.scheduled_date,
+    completedDate: item.completed_date,
+    status: item.status,
+    assignedTo: item.assigned_to,
+    notes: item.notes,
+    cost: item.cost,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  }));
+};
+
+// 특정 자산의 유지보수 스케줄 조회
+export const getMaintenanceSchedulesByAssetId = async (assetId: string): Promise<MaintenanceSchedule[]> => {
+  const { data, error } = await supabase
+    .from(TABLES.MAINTENANCE_SCHEDULES)
+    .select('*')
+    .eq('asset_id', assetId)
+    .order('scheduled_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching maintenance schedules:', error);
+    return [];
+  }
+  
+  return (data || []).map(item => ({
+    id: item.id,
+    assetId: item.asset_id,
+    type: item.type,
+    scheduledDate: item.scheduled_date,
+    completedDate: item.completed_date,
+    status: item.status,
+    assignedTo: item.assigned_to,
+    notes: item.notes,
+    cost: item.cost,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  }));
+};
+
+// 유지보수 스케줄 저장 (생성/수정)
+export const saveMaintenanceSchedule = async (schedule: MaintenanceSchedule): Promise<boolean> => {
+  const { data: existingData } = await supabase
+    .from(TABLES.MAINTENANCE_SCHEDULES)
+    .select('id')
+    .eq('id', schedule.id)
+    .single();
+
+  const dbRecord = {
+    id: schedule.id,
+    asset_id: schedule.assetId,
+    type: schedule.type,
+    scheduled_date: schedule.scheduledDate,
+    completed_date: schedule.completedDate,
+    status: schedule.status,
+    assigned_to: schedule.assignedTo,
+    notes: schedule.notes,
+    cost: schedule.cost,
+    updated_at: new Date().toISOString(),
+  };
+
+  let error;
+  if (existingData) {
+    // 업데이트
+    const result = await supabase
+      .from(TABLES.MAINTENANCE_SCHEDULES)
+      .update(dbRecord)
+      .eq('id', schedule.id);
+    error = result.error;
+  } else {
+    // 신규 생성
+    const result = await supabase
+      .from(TABLES.MAINTENANCE_SCHEDULES)
+      .insert({
+        ...dbRecord,
+        created_at: new Date().toISOString(),
+      });
+    error = result.error;
+  }
+  
+  if (error) {
+    console.error('Error saving maintenance schedule:', error);
+    return false;
+  }
+  
+  return true;
+};
+
+// 유지보수 스케줄 삭제
+export const deleteMaintenanceSchedule = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from(TABLES.MAINTENANCE_SCHEDULES)
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting maintenance schedule:', error);
+    return false;
+  }
+  
+  return true;
 };

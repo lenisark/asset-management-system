@@ -11,4 +11,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const TABLES = {
   ASSETS: 'assets',
   TRANSACTIONS: 'transactions',
+  MAINTENANCE_SCHEDULES: 'maintenance_schedules',
 } as const;
