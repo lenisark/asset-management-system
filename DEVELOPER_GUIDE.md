@@ -1,7 +1,13 @@
 # 개발자 가이드 (DEVELOPER_GUIDE.md)
 
-> 회사 자산관리 시스템 - 개발자를 위한 완전한 가이드  
-> 최종 업데이트: 2026-01-19
+> 회사 자산관리 시스템 v2.2 - 개발자를 위한 완전한 가이드  
+> 최종 업데이트: 2026-01-19 | 코드: ~4,878줄 | 컴포넌트: 13개
+
+**최신 업데이트**:
+- ✅ 실시간 알림 시스템 (Notification System)
+- ✅ 고급 검색 및 필터링 (Advanced Search & Filter)
+- ✅ 대시보드 고급 그래프 (Recharts Integration)
+- ✅ 완전한 다크 모드 지원 (Full Dark Mode Support)
 
 ---
 
@@ -28,16 +34,18 @@
 회사의 IT 자산(PC, 모니터, 키보드 등)을 효율적으로 관리하고, 불출/입고 이력을 추적하며, 유지보수 스케줄을 관리하는 웹 애플리케이션
 
 ### 주요 기능
-- 자산 CRUD (등록, 조회, 수정, 삭제)
-- 실시간 동기화 (Supabase Realtime)
-- 사용자 인증 (Supabase Auth)
-- 자산 사진 업로드 (Supabase Storage)
-- QR 코드 생성 및 인쇄
-- Excel 내보내기/가져오기
-- 불출/입고 관리
-- 유지보수 스케줄 관리
-- 대시보드 및 차트
-- 다크/라이트 모드 테마
+- ✅ 자산 CRUD (등록, 조회, 수정, 삭제)
+- ✅ 실시간 동기화 (Supabase Realtime)
+- ✅ **실시간 알림 시스템** (NEW!)
+- ✅ 사용자 인증 (Supabase Auth)
+- ✅ 자산 사진 업로드 (Supabase Storage, 한글 파일명 지원)
+- ✅ QR 코드 생성 및 인쇄
+- ✅ Excel 내보내기/가져오기
+- ✅ 불출/입고 관리
+- ✅ 유지보수 스케줄 관리
+- ✅ **고급 검색 및 필터링** (NEW!)
+- ✅ **대시보드 고급 그래프** (NEW! - Recharts)
+- ✅ 다크/라이트 모드 테마 (완전 지원)
 
 ---
 
@@ -52,21 +60,22 @@
 └──────┬──────┘
        │
        ↓
-┌─────────────────────────────────┐
-│      Frontend (React)           │
-│  - Components                   │
-│  - Context (Auth, Theme)        │
-│  - Utils (Excel, Supabase)      │
-└──────┬──────────────────────────┘
+┌──────────────────────────────────────┐
+│      Frontend (React 19)             │
+│  - Components (13개)                 │
+│  - Context (Auth, Theme)             │
+│  - Hooks (useNotifications)          │
+│  - Utils (Excel, Supabase, Dashboard)│
+└──────┬───────────────────────────────┘
        │
        ↓
-┌─────────────────────────────────┐
-│       Supabase Backend          │
-│  - PostgreSQL Database          │
-│  - Realtime Subscriptions       │
-│  - Authentication               │
-│  - Storage (Images)             │
-└─────────────────────────────────┘
+┌──────────────────────────────────────┐
+│       Supabase Backend               │
+│  - PostgreSQL Database (4 tables)    │
+│  - Realtime Subscriptions (알림)     │
+│  - Authentication                    │
+│  - Storage (Images)                  │
+└──────────────────────────────────────┘
 ```
 
 ### 데이터 흐름
@@ -84,19 +93,25 @@ User Action → React Component → Utils Function → Supabase API → Database
 ```
 asset-management-system/
 ├── src/
-│   ├── components/               # React 컴포넌트
-│   │   ├── AssetList.tsx         # 자산 목록 (검색/필터/Excel)
-│   │   ├── AssetForm.tsx         # 자산 등록/수정 폼
-│   │   ├── AssetDetail.tsx       # 자산 상세 정보
-│   │   ├── Dashboard.tsx         # 대시보드 (차트)
-│   │   ├── TransactionForm.tsx   # 불출/입고 폼
-│   │   ├── AuthPage.tsx          # 로그인/회원가입
-│   │   └── QRCodeModal.tsx       # QR 코드 생성
+│   ├── components/                # React 컴포넌트 (13개)
+│   │   ├── AssetList.tsx          # 자산 목록 (검색/필터/Excel)
+│   │   ├── AssetForm.tsx          # 자산 등록/수정 폼
+│   │   ├── AssetDetail.tsx        # 자산 상세 정보
+│   │   ├── Dashboard.tsx          # 대시보드 (Chart.js + Recharts)
+│   │   ├── TransactionForm.tsx    # 불출/입고 폼
+│   │   ├── MaintenanceForm.tsx    # 유지보수 스케줄 폼
+│   │   ├── DepreciationCalculator.tsx # 감가상각 계산기
+│   │   ├── NotificationBell.tsx   # 알림 벨 (NEW!)
+│   │   ├── QRCodeModal.tsx        # QR 코드 생성
+│   │   └── AuthPage.tsx           # 로그인/회원가입
 │   │
-│   ├── AuthContext.tsx           # 인증 컨텍스트 (전역 상태)
-│   ├── ThemeContext.tsx          # 테마 컨텍스트 (다크/라이트)
+│   ├── hooks/                     # 커스텀 훅 (NEW!)
+│   │   └── useNotifications.ts    # 알림 시스템 훅
 │   │
-│   ├── types.ts                  # TypeScript 타입 정의
+│   ├── AuthContext.tsx            # 인증 컨텍스트 (전역 상태)
+│   ├── ThemeContext.tsx           # 테마 컨텍스트 (다크/라이트)
+│   │
+│   ├── types.ts                   # TypeScript 타입 정의
 │   │
 │   ├── supabaseClient.ts         # Supabase 클라이언트 설정
 │   ├── utils-supabase.ts         # Supabase CRUD 함수

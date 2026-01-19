@@ -1,7 +1,13 @@
-# 회사 자산관리 시스템 (Supabase Full-Stack)
+# 회사 자산관리 시스템 v2.2 (Supabase Full-Stack)
 
 PC, 모니터, 키보드, 마우스 등 회사 IT 자산을 효율적으로 관리할 수 있는 풀스택 웹 애플리케이션입니다.
 Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 제공합니다.
+
+**✨ 최신 업데이트 (v2.2)**: 
+- 🔔 실시간 알림 시스템
+- 🔍 고급 검색 및 필터링
+- 📊 향상된 대시보드 (자산 가치 추이, 월별 구매 금액 그래프)
+- 🌓 완전한 다크 모드 지원
 
 ## ✨ 주요 기능
 
@@ -25,11 +31,15 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
 - 실시간 동기화 상태 표시
 
 ### 📊 4. 대시보드 & 차트
-- 전체 자산 현황 통계
-- **상태별 파이 차트** (사용가능, 사용중, 점검중)
-- **카테고리별 바 차트** (PC, Monitor, etc)
-- Chart.js 기반 인터랙티브 차트
+- **통계 카드**: 전체 자산 현황 (전체, 사용가능, 사용중, 점검중)
+- **Chart.js 차트**:
+  - 상태별 파이 차트 (사용가능, 사용중, 점검중)
+  - 카테고리별 바 차트 (PC, Monitor, etc)
+- **Recharts 고급 그래프** (NEW!):
+  - 📈 **자산 가치 추이** (Line Chart) - 감가상각 반영
+  - 📊 **월별 구매 금액** (Bar Chart) - 최근 12개월
 - 최근 등록 자산 목록
+- 완전한 다크 모드 지원
 
 ### 📦 5. 자산 관리
 - **자산 CRUD**: 등록, 조회, 수정, 삭제
@@ -38,9 +48,15 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
   - 제조사, 구매일, 구매금액
   - 상태 (사용가능/사용중/점검중/폐기)
   - 위치, 비고
-- **검색 및 필터링**:
-  - 이름, 시리얼 번호, 제조사로 검색
-  - 카테고리 및 상태별 필터
+- **고급 검색 및 필터링** (NEW!):
+  - 🔍 **전체 텍스트 검색**: 이름, 시리얼 번호, 제조사
+  - 📂 **카테고리 필터**: PC, Monitor, Keyboard, Mouse, Other
+  - 🎯 **상태 필터**: 사용가능, 사용중, 점검중, 폐기
+  - 💰 **가격 범위 필터**: 최소/최대 금액
+  - 📅 **구매 기간 필터**: 시작일 ~ 종료일
+  - 📍 **위치 필터**: 특정 위치 검색
+  - 📊 **필터 결과 표시**: 활성 필터 및 검색 결과 수
+- 다크 모드 완전 지원
 
 ### 📸 6. 자산 사진 업로드
 - **Supabase Storage** 연동
@@ -48,6 +64,7 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
 - 이미지 미리보기
 - 자산 상세 정보에서 이미지 표시
 - PNG, JPG 지원 (최대 5MB)
+- **한글 파일명 지원** (NEW!) - 자동으로 안전한 파일명으로 변환
 
 ### 📱 7. QR 코드 생성
 - 각 자산에 대한 **QR 코드 자동 생성**
@@ -76,7 +93,7 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
   - 자동 상태 변경 (→ 사용가능)
 - **이력 추적**: 각 자산별 완전한 이력 타임라인
 
-### 🛠️ 10. 유지보수 스케줄 관리 (NEW!)
+### 🛠️ 10. 유지보수 스케줄 관리
 - **유지보수 일정 등록**:
   - 점검, 수리, 청소, 업그레이드 등 유형 분류
   - 예정일, 담당자, 비용 기록
@@ -88,37 +105,61 @@ Supabase를 사용하여 실시간 데이터베이스, 인증, 파일 저장을 
   - 비용 통계 및 분석
 - **알림 기능**: 예정된 유지보수 일정 표시
 
-### 💰 11. 자산 감가상각 계산 (준비중)
+### 🔔 11. 실시간 알림 시스템 (NEW!)
+- **실시간 알림**:
+  - Supabase Realtime 구독으로 즉시 알림 수신
+  - 읽음/안읽음 상태 관리
+- **알림 유형**:
+  - 유지보수 일정 알림 (3일 전, 1일 전)
+  - 자산 변경 알림
+  - 시스템 알림
+- **알림 UI**:
+  - 헤더의 벨 아이콘에 미읽음 배지 표시
+  - 드롭다운으로 알림 목록 확인
+  - 개별 알림 읽음 처리
+  - 전체 알림 읽음 처리
+  - 개별 알림 삭제
+- 다크 모드 지원
+
+### 💰 12. 자산 감가상각 계산 (준비중)
 - **정액법 / 정률법** 감가상각 계산
 - 내용연수 및 잔존가치 설정
 - 연도별 감가상각비 자동 계산
 - 현재 자산 가치 추정
 - 회계 리포트 생성
 
-### 🔍 12. 자산 상세 정보
+### 🔍 13. 자산 상세 정보
 - 전체 자산 정보 확인
 - 자산 이미지 표시
 - 불출/입고 이력 타임라인
 - 유지보수 이력 타임라인
 - QR 코드 생성 버튼
 - 이력에서 바로 불출/입고 등록
+- 완전한 다크 모드 지원
 
 ## 🛠️ 기술 스택
 
 ### Frontend
-- **React 18** + TypeScript
-- **Vite** (번들러)
-- **Tailwind CSS** (스타일링, 다크 모드)
+- **React 19** + TypeScript
+- **Vite 7** (번들러)
+- **Tailwind CSS 4** (스타일링, 다크 모드)
 - **Lucide React** (아이콘)
-- **Chart.js** + react-chartjs-2 (차트)
+- **Chart.js 4** + react-chartjs-2 (기본 차트)
+- **Recharts 3** (고급 그래프 - NEW!)
 - **QRCode** (QR 코드 생성)
 - **XLSX** (SheetJS) (Excel 내보내기/가져오기)
 
 ### Backend (Supabase)
 - **Supabase PostgreSQL** (데이터베이스)
-- **Supabase Realtime** (실시간 동기화)
+- **Supabase Realtime** (실시간 동기화, 알림)
 - **Supabase Auth** (사용자 인증)
 - **Supabase Storage** (파일 저장)
+
+### 코드 통계
+- **총 코드 라인**: ~4,878줄 (TypeScript/React)
+- **컴포넌트**: 13개
+- **유틸리티 함수**: 5개 모듈
+- **SQL 스크립트**: 6개
 
 ## 🚀 시작하기
 
@@ -157,6 +198,13 @@ Supabase 대시보드 → SQL Editor에서 스크립트 실행
 -- assets 테이블, transactions 테이블, maintenance_schedules 테이블, 인덱스, RLS 정책 등 생성
 ```
 
+#### 🔔 알림 시스템 추가 (필수!)
+`supabase-notifications.sql` 파일 내용을 복사하여 실행
+
+```sql
+-- notifications 테이블, 인덱스, RLS 정책, 유틸리티 함수 생성
+```
+
 #### 🔄 기존 데이터베이스가 있는 경우 (v1.x → v2.0)
 `supabase-update.sql` 파일 내용을 복사하여 실행
 
@@ -174,6 +222,7 @@ Supabase 대시보드 → SQL Editor에서 스크립트 실행
 
 **⚠️ 주의**: 
 - `supabase-schema.sql`: 전체 스키마 (처음 설치용)
+- `supabase-notifications.sql`: 알림 시스템 (필수!)
 - `supabase-update.sql`: 업데이트만 (기존 DB용)
 
 **오류 해결**:
@@ -285,25 +334,44 @@ npm run preview
 asset-management-system/
 ├── src/
 │   ├── components/
-│   │   ├── Dashboard.tsx          # 대시보드 (차트 포함)
-│   │   ├── AssetList.tsx          # 자산 목록 (Excel 기능)
-│   │   ├── AssetForm.tsx          # 자산 등록/수정 (이미지 업로드)
-│   │   ├── AssetDetail.tsx        # 자산 상세 정보
-│   │   ├── TransactionForm.tsx    # 불출/입고 폼
-│   │   ├── AuthPage.tsx           # 로그인/회원가입
-│   │   └── QRCodeModal.tsx        # QR 코드 모달
-│   ├── AuthContext.tsx            # 인증 컨텍스트
-│   ├── ThemeContext.tsx           # 테마 컨텍스트 (NEW!)
-│   ├── supabaseClient.ts          # Supabase 클라이언트
-│   ├── utils-supabase.ts          # Supabase CRUD 함수
-│   ├── utils-excel.ts             # Excel 내보내기/가져오기 (NEW!)
-│   ├── types.ts                   # TypeScript 타입
-│   ├── App.tsx                    # 메인 앱
-│   └── main.tsx                   # 엔트리 포인트
-├── supabase-schema.sql            # DB 스키마 (전체)
-├── supabase-update.sql            # DB 업데이트 스크립트
-├── supabase-maintenance-update.sql # 유지보수 기능 추가 스크립트 (NEW!)
-├── .env.example                   # 환경 변수 예제
+│   │   ├── Dashboard.tsx               # 대시보드 (Chart.js + Recharts)
+│   │   ├── AssetList.tsx               # 자산 목록 (검색/필터)
+│   │   ├── AssetForm.tsx               # 자산 등록/수정 (이미지 업로드)
+│   │   ├── AssetDetail.tsx             # 자산 상세 정보
+│   │   ├── TransactionForm.tsx         # 불출/입고 폼
+│   │   ├── MaintenanceForm.tsx         # 유지보수 스케줄 폼
+│   │   ├── DepreciationCalculator.tsx  # 감가상각 계산기
+│   │   ├── NotificationBell.tsx        # 알림 벨 (NEW!)
+│   │   ├── QRCodeModal.tsx             # QR 코드 모달
+│   │   └── AuthPage.tsx                # 로그인/회원가입
+│   ├── hooks/
+│   │   └── useNotifications.ts         # 알림 커스텀 훅 (NEW!)
+│   ├── AuthContext.tsx                 # 인증 컨텍스트
+│   ├── ThemeContext.tsx                # 테마 컨텍스트
+│   ├── supabaseClient.ts               # Supabase 클라이언트
+│   ├── utils-supabase.ts               # Supabase CRUD 함수
+│   ├── utils-excel.ts                  # Excel 내보내기/가져오기
+│   ├── utils-dashboard.ts              # 대시보드 데이터 계산 (NEW!)
+│   ├── utils-depreciation.ts           # 감가상각 계산
+│   ├── types.ts                        # TypeScript 타입
+│   ├── App.tsx                         # 메인 앱
+│   └── main.tsx                        # 엔트리 포인트
+├── docs/                               # 문서 폴더 (NEW!)
+│   ├── NOTIFICATION_SYSTEM_COMPLETE.md # 알림 시스템 완료 보고서
+│   ├── DASHBOARD_IMPROVEMENT_COMPLETE.md # 대시보드 개선 완료 보고서
+│   ├── FUTURE_ROADMAP.md               # 향후 개발 로드맵
+│   ├── KOREAN_FILENAME_FIX.md          # 한글 파일명 문제 해결
+│   ├── STORAGE_POLICY_GUIDE.md         # Storage 정책 가이드
+│   ├── STORAGE_POLICY_QUICKSTART.md    # Storage 빠른 설정
+│   └── STORAGE_POLICY_CLEANUP.md       # Storage 정책 정리
+├── supabase-schema.sql                 # DB 스키마 (전체)
+├── supabase-notifications.sql          # 알림 시스템 스키마 (NEW!)
+├── supabase-update.sql                 # DB 업데이트 스크립트
+├── supabase-maintenance-update.sql     # 유지보수 기능 추가
+├── supabase-storage-policies.sql       # Storage 정책 설정 (필수!)
+├── DEPLOYMENT_GUIDE.md                 # 배포 가이드
+├── DEVELOPER_GUIDE.md                  # 개발자 가이드
+├── .env.example                        # 환경 변수 예제
 ├── package.json
 └── README.md
 ```
@@ -339,7 +407,17 @@ asset-management-system/
 - created_at (TIMESTAMP)  # 생성일
 ```
 
-### `maintenance_schedules` 테이블 ⭐ NEW!
+### `notifications` 테이블 ⭐ NEW!
+```sql
+- id (UUID)               # 고유 ID
+- user_id (UUID)          # 사용자 ID (FK → auth.users)
+- type (TEXT)             # maintenance/asset/system
+- title (TEXT)            # 알림 제목
+- message (TEXT)          # 알림 내용
+- asset_id (UUID)         # 관련 자산 ID (FK, 선택사항)
+- read (BOOLEAN)          # 읽음 여부
+- created_at (TIMESTAMP)  # 생성일
+```
 ```sql
 - id (UUID)               # 고유 ID
 - asset_id (UUID)         # 자산 ID (FK)
@@ -378,7 +456,16 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 ## 🎯 주요 개선 사항
 
-### v2.1 (2026-01-19) 🆕
+### v2.2 (2026-01-19) 🆕 최신!
+- ✅ **실시간 알림 시스템** (유지보수 일정, 자산 변경 알림)
+- ✅ **고급 검색 및 필터링** (가격 범위, 구매 기간, 위치 등)
+- ✅ **대시보드 고급 그래프** (Recharts)
+  - 자산 가치 추이 (감가상각 반영)
+  - 월별 구매 금액 그래프
+- ✅ **완전한 다크 모드 지원** (모든 컴포넌트)
+- ✅ **한글 파일명 업로드 지원**
+
+### v2.1 (2026-01-19)
 - ✅ **테마 전환** (다크/라이트 모드)
 - ✅ **Excel 내보내기/가져오기** (대량 자산 등록)
 - ✅ **유지보수 스케줄 관리** (점검, 수리, 청소, 업그레이드)
@@ -399,15 +486,21 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 ## 🚧 향후 계획
 
-- [ ] **유지보수 스케줄 UI 완성** (진행중)
-- [ ] **자산 감가상각 계산 UI 구현** (진행중)
-- [ ] 모바일 앱 (React Native)
+### 🔜 진행 중 (v2.3)
+- [ ] **PDF 보고서 생성** (자산 목록, 감가상각 회계 보고서)
+- [ ] **권한 관리** (관리자/일반 사용자 구분)
+- [ ] **모바일 최적화** (반응형 레이아웃, PWA)
+- [ ] **QR/바코드 스캔** (모바일 카메라 지원)
+
+### 📋 계획됨 (v3.0)
+- [ ] 자산 대여/반납 관리
 - [ ] 소셜 로그인 (Google, GitHub)
 - [ ] 이메일 알림 (예정된 유지보수, 점검 알림)
 - [ ] 다국어 지원 (영어, 일본어)
-- [ ] PWA 지원 (오프라인 모드)
-- [ ] 보고서 생성 (PDF, Excel)
-- [ ] 자산 대여 시스템
+- [ ] ERP 시스템 연동 (API)
+- [ ] AI 기능 (자산 가치 예측, 교체 시기 추천)
+
+**자세한 로드맵**: [FUTURE_ROADMAP.md](./docs/FUTURE_ROADMAP.md)
 
 ## 📞 문의 및 지원
 
@@ -424,12 +517,24 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 ### 📸 Storage 설정 가이드
 - **[STORAGE_POLICY_GUIDE.md](./docs/STORAGE_POLICY_GUIDE.md)** - Supabase Storage Policies 설정 방법 (이미지 업로드/조회)
+- **[STORAGE_POLICY_QUICKSTART.md](./docs/STORAGE_POLICY_QUICKSTART.md)** - 빠른 설정 가이드
+- **[STORAGE_POLICY_CLEANUP.md](./docs/STORAGE_POLICY_CLEANUP.md)** - Storage 정책 정리 방법
+
+### 🔔 기능 완료 보고서
+- **[NOTIFICATION_SYSTEM_COMPLETE.md](./docs/NOTIFICATION_SYSTEM_COMPLETE.md)** - 알림 시스템 구현 보고서
+- **[DASHBOARD_IMPROVEMENT_COMPLETE.md](./docs/DASHBOARD_IMPROVEMENT_COMPLETE.md)** - 대시보드 개선 보고서
+- **[KOREAN_FILENAME_FIX.md](./docs/KOREAN_FILENAME_FIX.md)** - 한글 파일명 업로드 문제 해결
+
+### 🗺️ 로드맵
+- **[FUTURE_ROADMAP.md](./docs/FUTURE_ROADMAP.md)** - 향후 개발 계획 및 우선순위
 
 ### 📝 SQL 스크립트
 - **supabase-schema.sql** - 전체 데이터베이스 스키마 (처음 설치용)
+- **supabase-notifications.sql** - 알림 시스템 스키마 (필수!)
 - **supabase-update.sql** - 기존 DB 업데이트 (v1.x → v2.0)
 - **supabase-maintenance-update.sql** - 유지보수 스케줄 테이블 추가
 - **supabase-storage-policies.sql** - Storage 정책 설정 (필수!)
+- **supabase-storage-policies-cleanup.sql** - Storage 정책 정리용
 
 ## 📄 라이선스
 
