@@ -14,6 +14,7 @@ export interface Asset {
   status: AssetStatus;
   location: string;
   notes?: string;
+  imageUrl?: string; // 자산 이미지 URL
   createdAt: string;
   updatedAt: string;
 }

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS assets (
   status TEXT NOT NULL CHECK (status IN ('available', 'in-use', 'maintenance', 'disposed')),
   location TEXT NOT NULL,
   notes TEXT,
+  image_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -82,3 +83,22 @@ CREATE TRIGGER update_assets_updated_at
 --   (gen_random_uuid(), 'Dell OptiPlex 7090', 'PC', 'SN-PC-001', 'Dell', '2024-01-15', 1500000, 'available', '본사 3층 개발팀', '고성능 워크스테이션'),
 --   (gen_random_uuid(), 'LG 27인치 모니터', 'Monitor', 'SN-MON-001', 'LG', '2024-01-20', 350000, 'in-use', '본사 2층 디자인팀', 'QHD 해상도'),
 --   (gen_random_uuid(), 'MacBook Pro 16', 'PC', 'SN-PC-002', 'Apple', '2024-02-01', 3500000, 'in-use', '본사 4층 경영지원팀', 'M2 Max 프로세서');
+
+-- Storage 버킷 생성 (Supabase 대시보드에서 수동 생성 필요)
+-- 1. Supabase 대시보드 → Storage 메뉴 이동
+-- 2. "New bucket" 클릭
+-- 3. 버킷 이름: asset-images
+-- 4. Public bucket: ON (공개 액세스 허용)
+-- 5. File size limit: 5MB
+-- 6. Allowed MIME types: image/*
+
+-- Storage 정책 (버킷 생성 후 SQL Editor에서 실행)
+-- INSERT INTO storage.buckets (id, name, public)
+-- VALUES ('asset-images', 'asset-images', true)
+-- ON CONFLICT (id) DO NOTHING;
+
+-- Storage 접근 정책
+-- CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'asset-images');
+-- CREATE POLICY "Authenticated users can upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'asset-images' AND auth.role() = 'authenticated');
+-- CREATE POLICY "Users can update own uploads" ON storage.objects FOR UPDATE USING (bucket_id = 'asset-images' AND auth.role() = 'authenticated');
+-- CREATE POLICY "Users can delete own uploads" ON storage.objects FOR DELETE USING (bucket_id = 'asset-images' AND auth.role() = 'authenticated');

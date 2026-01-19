@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Asset, AssetCategory, AssetStatus } from '../types';
-import { X } from 'lucide-react';
-import { generateId } from '../utils';
+import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { generateId, uploadAssetImage } from '../utils-supabase';
 
 interface AssetFormProps {
   asset?: Asset;
@@ -20,7 +20,11 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
     status: 'available',
     location: '',
     notes: '',
+    imageUrl: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (asset) {
@@ -34,22 +38,55 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
         status: asset.status,
         location: asset.location,
         notes: asset.notes || '',
+        imageUrl: asset.imageUrl || '',
       });
+      if (asset.imageUrl) {
+        setImagePreview(asset.imageUrl);
+      }
     }
   }, [asset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     
-    const now = new Date().toISOString();
-    const newAsset: Asset = {
-      id: asset?.id || generateId(),
-      ...formData,
-      createdAt: asset?.createdAt || now,
-      updatedAt: now,
-    };
-    
-    onSave(newAsset);
+    try {
+      const assetId = asset?.id || generateId();
+      let imageUrl = formData.imageUrl;
+
+      // 새 이미지 업로드
+      if (imageFile) {
+        const uploadedUrl = await uploadAssetImage(imageFile, assetId);
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
+
+      const now = new Date().toISOString();
+      const newAsset: Asset = {
+        id: assetId,
+        ...formData,
+        imageUrl,
+        createdAt: asset?.createdAt || now,
+        updatedAt: now,
+      };
+      
+      onSave(newAsset);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleChange = (
@@ -78,6 +115,55 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* 이미지 업로드 섹션 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              자산 이미지
+            </label>
+            <div className="flex items-start gap-4">
+              {/* 이미지 미리보기 */}
+              {imagePreview ? (
+                <div className="relative w-32 h-32 border-2 border-gray-300 rounded-lg overflow-hidden">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview('');
+                      setFormData(prev => ({ ...prev, imageUrl: '' }));
+                    }}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                  <ImageIcon className="w-12 h-12 text-gray-400" />
+                </div>
+              )}
+              
+              {/* 업로드 버튼 */}
+              <div className="flex-1">
+                <label className="flex flex-col items-center px-4 py-6 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="text-sm text-gray-600">이미지 선택 또는 드래그</span>
+                  <span className="text-xs text-gray-400 mt-1">PNG, JPG (최대 5MB)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -225,15 +311,24 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              disabled={uploading}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               취소
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              disabled={uploading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
-              {asset ? '수정' : '등록'}
+              {uploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>업로드 중...</span>
+                </>
+              ) : (
+                <span>{asset ? '수정' : '등록'}</span>
+              )}
             </button>
           </div>
         </form>

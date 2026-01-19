@@ -1,7 +1,8 @@
 import { Asset, Transaction } from '../types';
-import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building } from 'lucide-react';
+import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building, QrCode } from 'lucide-react';
 import { formatDate, formatCurrency, getTransactionsByAssetId } from '../utils-supabase';
 import { useState, useEffect } from 'react';
+import QRCodeModal from './QRCodeModal';
 
 interface AssetDetailProps {
   asset: Asset;
@@ -11,6 +12,7 @@ interface AssetDetailProps {
 
 const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   useEffect(() => {
     const loadTransactions = async () => {
@@ -37,6 +39,18 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
           {/* 기본 정보 */}
           <div className="bg-gray-50 p-6 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">기본 정보</h3>
+            
+            {/* 자산 이미지 */}
+            {asset.imageUrl && (
+              <div className="mb-4">
+                <img 
+                  src={asset.imageUrl} 
+                  alt={asset.name}
+                  className="w-full max-w-md h-64 object-cover rounded-lg border border-gray-200"
+                />
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600">자산명</p>
@@ -156,7 +170,14 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
           </div>
 
           {/* 하단 버튼 */}
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-between pt-4 border-t">
+            <button
+              onClick={() => setShowQRCode(true)}
+              className="flex items-center gap-2 px-6 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
+            >
+              <QrCode className="w-5 h-5" />
+              QR 코드
+            </button>
             <button
               onClick={onClose}
               className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
@@ -166,6 +187,11 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
           </div>
         </div>
       </div>
+      
+      {/* QR 코드 모달 */}
+      {showQRCode && (
+        <QRCodeModal asset={asset} onClose={() => setShowQRCode(false)} />
+      )}
     </div>
   );
 };

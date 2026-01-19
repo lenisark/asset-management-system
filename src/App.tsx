@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Asset } from './types';
 import { getAssets, saveAsset, deleteAsset } from './utils-supabase';
+import { supabase, TABLES } from './supabaseClient';
+import { useAuth } from './AuthContext';
+import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import AssetList from './components/AssetList';
 import AssetForm from './components/AssetForm';
 import AssetDetail from './components/AssetDetail';
 import TransactionForm from './components/TransactionForm';
-import { LayoutDashboard, Package, Plus, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Package, Plus, AlertCircle, Wifi, LogOut, User } from 'lucide-react';
 
 type View = 'dashboard' | 'assets';
 
 function App() {
+  const { user, signOut, loading: authLoading } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [showAssetForm, setShowAssetForm] = useState(false);
@@ -19,9 +23,52 @@ function App() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRealtime, setIsRealtime] = useState(false);
+
+  // 인증되지 않은 경우 로그인 페이지 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   useEffect(() => {
     loadAssets();
+    
+    // Supabase Realtime 구독
+    const channel = supabase
+      .channel('assets-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: TABLES.ASSETS },
+        (payload) => {
+          console.log('Realtime change:', payload);
+          setIsRealtime(true);
+          setTimeout(() => setIsRealtime(false), 2000);
+          
+          if (payload.eventType === 'INSERT') {
+            loadAssets(); // 새 자산 추가 시 전체 재로드
+          } else if (payload.eventType === 'UPDATE') {
+            loadAssets(); // 자산 업데이트 시 전체 재로드
+          } else if (payload.eventType === 'DELETE') {
+            loadAssets(); // 자산 삭제 시 전체 재로드
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
+
+    // 클린업
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadAssets = async () => {
@@ -101,16 +148,48 @@ function App() {
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">
-              자산관리 시스템 (Supabase)
-            </h1>
-            <button
-              onClick={handleNewAsset}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              자산 등록
-            </button>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">
+                자산관리 시스템
+              </h1>
+              {/* 실시간 동기화 상태 */}
+              <div className="flex items-center gap-1 text-sm">
+                {isRealtime ? (
+                  <div className="flex items-center gap-1 text-green-600 animate-pulse">
+                    <Wifi className="w-4 h-4" />
+                    <span>동기화 중</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-gray-400">
+                    <Wifi className="w-4 h-4" />
+                    <span>실시간</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              {/* 사용자 정보 */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+              {/* 자산 등록 버튼 */}
+              <button
+                onClick={handleNewAsset}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                자산 등록
+              </button>
+              {/* 로그아웃 버튼 */}
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </header>

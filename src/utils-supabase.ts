@@ -24,6 +24,7 @@ export const getAssets = async (): Promise<Asset[]> => {
     status: item.status,
     location: item.location,
     notes: item.notes,
+    imageUrl: item.image_url,
     createdAt: item.created_at,
     updatedAt: item.updated_at,
   }));
@@ -41,6 +42,7 @@ export const saveAsset = async (asset: Asset): Promise<boolean> => {
     status: asset.status,
     location: asset.location,
     notes: asset.notes,
+    image_url: asset.imageUrl,
     updated_at: new Date().toISOString(),
   };
 
@@ -185,6 +187,62 @@ export const getTransactionsByAssetId = async (assetId: string): Promise<Transac
     notes: item.notes,
     createdAt: item.created_at,
   }));
+};
+
+// 이미지 업로드
+export const uploadAssetImage = async (file: File, assetId: string): Promise<string | null> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${assetId}-${Date.now()}.${fileExt}`;
+    const filePath = `assets/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('asset-images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      return null;
+    }
+
+    // 공개 URL 가져오기
+    const { data } = supabase.storage
+      .from('asset-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return null;
+  }
+};
+
+// 이미지 삭제
+export const deleteAssetImage = async (imageUrl: string): Promise<boolean> => {
+  try {
+    // URL에서 파일 경로 추출
+    const urlParts = imageUrl.split('/asset-images/');
+    if (urlParts.length < 2) return false;
+    
+    const filePath = urlParts[1];
+
+    const { error } = await supabase.storage
+      .from('asset-images')
+      .remove([`assets/${filePath}`]);
+
+    if (error) {
+      console.error('Error deleting image:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return false;
+  }
 };
 
 // UUID 생성

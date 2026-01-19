@@ -1,5 +1,26 @@
 import { Asset, AssetCategory, DashboardStats } from '../types';
 import { Package, Monitor, Laptop, Wrench, Box } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 interface DashboardProps {
   assets: Asset[];
@@ -26,6 +47,62 @@ const Dashboard = ({ assets }: DashboardProps) => {
     Keyboard: <Box className="w-6 h-6" />,
     Mouse: <Box className="w-6 h-6" />,
     Other: <Package className="w-6 h-6" />,
+  };
+
+  // 상태별 차트 데이터
+  const statusChartData = {
+    labels: ['사용 가능', '사용 중', '점검 중'],
+    datasets: [
+      {
+        label: '자산 수',
+        data: [stats.availableAssets, stats.inUseAssets, stats.maintenanceAssets],
+        backgroundColor: [
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+        ],
+        borderColor: [
+          'rgb(16, 185, 129)',
+          'rgb(245, 158, 11)',
+          'rgb(239, 68, 68)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // 카테고리별 차트 데이터
+  const categoryChartData = {
+    labels: ['PC', 'Monitor', 'Keyboard', 'Mouse', 'Other'],
+    datasets: [
+      {
+        label: '자산 수',
+        data: [
+          stats.assetsByCategory.PC,
+          stats.assetsByCategory.Monitor,
+          stats.assetsByCategory.Keyboard,
+          stats.assetsByCategory.Mouse,
+          stats.assetsByCategory.Other,
+        ],
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(139, 92, 246, 0.8)',
+          'rgba(236, 72, 153, 0.8)',
+          'rgba(251, 146, 60, 0.8)',
+          'rgba(156, 163, 175, 0.8)',
+        ],
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+      },
+    },
   };
 
   return (
@@ -71,6 +148,25 @@ const Dashboard = ({ assets }: DashboardProps) => {
               <p className="text-2xl font-bold text-gray-800">{stats.maintenanceAssets}</p>
             </div>
             <Wrench className="w-10 h-10 text-red-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* 차트 섹션 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 상태별 파이 차트 */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">자산 상태 분포</h3>
+          <div className="h-64">
+            <Pie data={statusChartData} options={chartOptions} />
+          </div>
+        </div>
+
+        {/* 카테고리별 바 차트 */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">카테고리별 자산</h3>
+          <div className="h-64">
+            <Bar data={categoryChartData} options={chartOptions} />
           </div>
         </div>
       </div>
