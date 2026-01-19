@@ -1,6 +1,6 @@
 import { Asset, Transaction } from '../types';
 import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building } from 'lucide-react';
-import { formatDate, formatCurrency, getTransactionsByAssetId } from '../utils';
+import { formatDate, formatCurrency, getTransactionsByAssetId } from '../utils-supabase';
 import { useState, useEffect } from 'react';
 
 interface AssetDetailProps {
@@ -13,7 +13,11 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    setTransactions(getTransactionsByAssetId(asset.id));
+    const loadTransactions = async () => {
+      const data = await getTransactionsByAssetId(asset.id);
+      setTransactions(data);
+    };
+    loadTransactions();
   }, [asset.id]);
 
   return (

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Asset } from './types';
-import { getAssets, saveAsset, deleteAsset } from './utils';
+import { getAssets, saveAsset, deleteAsset } from './utils-supabase';
 import Dashboard from './components/Dashboard';
 import AssetList from './components/AssetList';
 import AssetForm from './components/AssetForm';
 import AssetDetail from './components/AssetDetail';
 import TransactionForm from './components/TransactionForm';
-import { LayoutDashboard, Package, Plus } from 'lucide-react';
+import { LayoutDashboard, Package, Plus, AlertCircle } from 'lucide-react';
 
 type View = 'dashboard' | 'assets';
 
@@ -17,25 +17,55 @@ function App() {
   const [showAssetDetail, setShowAssetDetail] = useState(false);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAssets();
   }, []);
 
-  const loadAssets = () => {
-    setAssets(getAssets());
+  const loadAssets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getAssets();
+      setAssets(data);
+    } catch (err) {
+      console.error('Error loading assets:', err);
+      setError('자산 목록을 불러오는데 실패했습니다. Supabase 연결을 확인해주세요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveAsset = (asset: Asset) => {
-    saveAsset(asset);
-    loadAssets();
-    setShowAssetForm(false);
-    setSelectedAsset(undefined);
+  const handleSaveAsset = async (asset: Asset) => {
+    try {
+      const success = await saveAsset(asset);
+      if (success) {
+        await loadAssets();
+        setShowAssetForm(false);
+        setSelectedAsset(undefined);
+      } else {
+        alert('자산 저장에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Error saving asset:', err);
+      alert('자산 저장 중 오류가 발생했습니다.');
+    }
   };
 
-  const handleDeleteAsset = (id: string) => {
-    deleteAsset(id);
-    loadAssets();
+  const handleDeleteAsset = async (id: string) => {
+    try {
+      const success = await deleteAsset(id);
+      if (success) {
+        await loadAssets();
+      } else {
+        alert('자산 삭제에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('Error deleting asset:', err);
+      alert('자산 삭제 중 오류가 발생했습니다.');
+    }
   };
 
   const handleEditAsset = (asset: Asset) => {
@@ -58,8 +88,8 @@ function App() {
     setShowTransactionForm(true);
   };
 
-  const handleTransactionComplete = () => {
-    loadAssets();
+  const handleTransactionComplete = async () => {
+    await loadAssets();
     setShowTransactionForm(false);
     setShowAssetDetail(false);
     setSelectedAsset(undefined);
@@ -72,7 +102,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">
-              자산관리 시스템
+              자산관리 시스템 (Supabase)
             </h1>
             <button
               onClick={handleNewAsset}
@@ -84,6 +114,21 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+              <p className="text-red-700">{error}</p>
+            </div>
+            <p className="text-sm text-red-600 mt-2">
+              .env 파일에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 설정해주세요.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 네비게이션 */}
       <nav className="bg-white shadow-sm border-b">
@@ -117,14 +162,22 @@ function App() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentView === 'dashboard' && <Dashboard assets={assets} />}
-        {currentView === 'assets' && (
-          <AssetList
-            assets={assets}
-            onEdit={handleEditAsset}
-            onDelete={handleDeleteAsset}
-            onView={handleViewAsset}
-          />
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <>
+            {currentView === 'dashboard' && <Dashboard assets={assets} />}
+            {currentView === 'assets' && (
+              <AssetList
+                assets={assets}
+                onEdit={handleEditAsset}
+                onDelete={handleDeleteAsset}
+                onView={handleViewAsset}
+              />
+            )}
+          </>
         )}
       </main>
 

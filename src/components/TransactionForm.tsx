@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Asset, Transaction } from '../types';
 import { X, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { generateId, formatDate, getTransactionsByAssetId, saveTransaction, saveAsset } from '../utils';
+import { generateId, saveTransaction, saveAsset } from '../utils-supabase';
 
 interface TransactionFormProps {
   asset: Asset;
@@ -18,7 +18,7 @@ const TransactionForm = ({ asset, onComplete, onCancel }: TransactionFormProps) 
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const transaction: Transaction = {
@@ -32,7 +32,7 @@ const TransactionForm = ({ asset, onComplete, onCancel }: TransactionFormProps) 
       createdAt: new Date().toISOString(),
     };
     
-    saveTransaction(transaction);
+    await saveTransaction(transaction);
     
     // 자산 상태 업데이트
     const updatedAsset: Asset = {
@@ -41,7 +41,7 @@ const TransactionForm = ({ asset, onComplete, onCancel }: TransactionFormProps) 
       updatedAt: new Date().toISOString(),
     };
     
-    saveAsset(updatedAsset);
+    await saveAsset(updatedAsset);
     onComplete();
   };
 
