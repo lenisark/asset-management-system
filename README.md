@@ -180,15 +180,31 @@ Supabase 대시보드 → SQL Editor에서 스크립트 실행
 - "policy already exists" 오류가 나면 `supabase-update.sql` 사용
 - 기존 정책을 자동으로 삭제하고 재생성합니다
 
-### 5. Storage 버킷 생성
+### 5. Storage 버킷 생성 및 정책 설정
 
 Supabase 대시보드 → Storage:
 
-1. "New bucket" 클릭
-2. 버킷 이름: `asset-images`
-3. Public bucket: **ON**
-4. File size limit: 5MB
-5. Allowed MIME types: `image/*`
+1. **버킷 생성**
+   - "New bucket" 클릭
+   - 버킷 이름: `asset-images`
+   - Public bucket: **ON**
+   - File size limit: 5MB
+   - Allowed MIME types: `image/*`
+
+2. **Storage 정책 설정** (⚠️ 필수!)
+   
+   **방법 1: SQL로 설정 (추천)**
+   - SQL Editor에서 `supabase-storage-policies.sql` 실행
+   
+   **방법 2: UI로 설정**
+   - Storage → asset-images → Policies → "New Policy"
+   - [📸 상세 설정 가이드 보기](./docs/STORAGE_POLICY_GUIDE.md)
+
+   필수 정책 4개:
+   - ✅ Public Read (모두가 이미지 조회 가능)
+   - ✅ Authenticated Upload (로그인 사용자만 업로드)
+   - ✅ Authenticated Update (로그인 사용자만 수정)
+   - ✅ Authenticated Delete (로그인 사용자만 삭제)
 
 ### 6. 환경 변수 설정
 
@@ -397,6 +413,23 @@ CREATE POLICY "Authenticated upload" ON storage.objects
 
 - **GitHub**: https://github.com/lenisark/asset-management-system
 - **Issues**: 버그 리포트 및 기능 제안
+
+## 📚 문서
+
+### 🚀 배포 가이드
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Supabase 설정부터 Vercel 배포까지 완벽 가이드
+
+### 👨‍💻 개발자 가이드
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - 아키텍처, 코드 컨벤션, 개발 워크플로우
+
+### 📸 Storage 설정 가이드
+- **[STORAGE_POLICY_GUIDE.md](./docs/STORAGE_POLICY_GUIDE.md)** - Supabase Storage Policies 설정 방법 (이미지 업로드/조회)
+
+### 📝 SQL 스크립트
+- **supabase-schema.sql** - 전체 데이터베이스 스키마 (처음 설치용)
+- **supabase-update.sql** - 기존 DB 업데이트 (v1.x → v2.0)
+- **supabase-maintenance-update.sql** - 유지보수 스케줄 테이블 추가
+- **supabase-storage-policies.sql** - Storage 정책 설정 (필수!)
 
 ## 📄 라이선스
 
