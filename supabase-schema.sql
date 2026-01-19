@@ -1,4 +1,6 @@
 -- Supabase 자산관리 시스템 데이터베이스 스키마
+-- 주의: 이 스크립트는 처음 설치 시에만 사용하세요
+-- 기존 데이터베이스가 있다면 supabase-update.sql을 사용하세요
 
 -- 자산 테이블
 CREATE TABLE IF NOT EXISTS assets (
@@ -40,6 +42,14 @@ CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
+-- 기존 정책 삭제 (있는 경우)
+DROP POLICY IF EXISTS "Enable read access for all users" ON assets;
+DROP POLICY IF EXISTS "Enable read access for all users" ON transactions;
+DROP POLICY IF EXISTS "Enable insert for all users" ON assets;
+DROP POLICY IF EXISTS "Enable insert for all users" ON transactions;
+DROP POLICY IF EXISTS "Enable update for all users" ON assets;
+DROP POLICY IF EXISTS "Enable delete for all users" ON assets;
+
 -- 모든 사용자가 읽기 가능
 CREATE POLICY "Enable read access for all users" ON assets
   FOR SELECT USING (true);
@@ -71,7 +81,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 트리거 생성
+-- 트리거 생성 (기존 트리거 교체)
+DROP TRIGGER IF EXISTS update_assets_updated_at ON assets;
 CREATE TRIGGER update_assets_updated_at
   BEFORE UPDATE ON assets
   FOR EACH ROW
