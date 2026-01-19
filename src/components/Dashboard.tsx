@@ -11,6 +11,23 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
+import { 
+  LineChart, 
+  Line, 
+  BarChart as RechartsBar, 
+  Bar as RechartsBarElement,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer
+} from 'recharts';
+import { 
+  getMonthlyPurchaseData, 
+  getAssetValueTrendData, 
+  formatMonthLabel,
+  formatCurrency 
+} from '../utils-dashboard';
 
 ChartJS.register(
   CategoryScale,
@@ -40,6 +57,10 @@ const Dashboard = ({ assets }: DashboardProps) => {
       Other: assets.filter(a => a.category === 'Other').length,
     }
   };
+
+  // Recharts 데이터 준비
+  const monthlyPurchaseData = getMonthlyPurchaseData(assets);
+  const assetValueTrendData = getAssetValueTrendData(assets);
 
   const categoryIcons: Record<AssetCategory, React.ReactNode> = {
     PC: <Laptop className="w-6 h-6" />,
@@ -107,45 +128,45 @@ const Dashboard = ({ assets }: DashboardProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">대시보드</h2>
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">대시보드</h2>
       
       {/* 상태별 통계 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">전체 자산</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.totalAssets}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">전체 자산</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.totalAssets}</p>
             </div>
             <Package className="w-10 h-10 text-blue-500" />
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-green-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">사용 가능</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.availableAssets}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">사용 가능</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.availableAssets}</p>
             </div>
             <Box className="w-10 h-10 text-green-500" />
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-orange-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">사용 중</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.inUseAssets}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">사용 중</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.inUseAssets}</p>
             </div>
             <Laptop className="w-10 h-10 text-orange-500" />
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-red-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">점검 중</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.maintenanceAssets}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">점검 중</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.maintenanceAssets}</p>
             </div>
             <Wrench className="w-10 h-10 text-red-500" />
           </div>
@@ -155,74 +176,150 @@ const Dashboard = ({ assets }: DashboardProps) => {
       {/* 차트 섹션 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 상태별 파이 차트 */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">자산 상태 분포</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">자산 상태 분포</h3>
           <div className="h-64">
             <Pie data={statusChartData} options={chartOptions} />
           </div>
         </div>
 
         {/* 카테고리별 바 차트 */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">카테고리별 자산</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">카테고리별 자산</h3>
           <div className="h-64">
             <Bar data={categoryChartData} options={chartOptions} />
           </div>
         </div>
       </div>
 
+      {/* Recharts 그래프 섹션 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 자산 가치 추이 그래프 (Line Chart) */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            자산 가치 추이 (감가상각 반영)
+          </h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={assetValueTrendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="month" 
+                tickFormatter={formatMonthLabel}
+                stroke="#6b7280"
+              />
+              <YAxis 
+                tickFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
+                stroke="#6b7280"
+              />
+              <RechartsTooltip 
+                formatter={(value) => [formatCurrency(Number(value)), '자산 가치']}
+                labelFormatter={formatMonthLabel}
+                contentStyle={{ 
+                  backgroundColor: '#fff', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px'
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                dot={{ fill: '#3b82f6', r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* 월별 구매 금액 그래프 (Bar Chart) */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            월별 구매 금액
+          </h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <RechartsBar data={monthlyPurchaseData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="month" 
+                tickFormatter={formatMonthLabel}
+                stroke="#6b7280"
+              />
+              <YAxis 
+                tickFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
+                stroke="#6b7280"
+              />
+              <RechartsTooltip 
+                formatter={(value) => [formatCurrency(Number(value)), '구매 금액']}
+                labelFormatter={formatMonthLabel}
+                contentStyle={{ 
+                  backgroundColor: '#fff', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px'
+                }}
+              />
+              <RechartsBarElement 
+                dataKey="amount" 
+                fill="#10b981" 
+                radius={[8, 8, 0, 0]}
+              />
+            </RechartsBar>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* 카테고리별 통계 */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">카테고리별 자산</h3>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">카테고리별 자산</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {(Object.keys(stats.assetsByCategory) as AssetCategory[]).map(category => (
-            <div key={category} className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-blue-600 mb-2">
+            <div key={category} className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-blue-600 dark:text-blue-400 mb-2">
                 {categoryIcons[category]}
               </div>
-              <p className="text-sm text-gray-600">{category}</p>
-              <p className="text-xl font-bold text-gray-800">{stats.assetsByCategory[category]}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{category}</p>
+              <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{stats.assetsByCategory[category]}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* 최근 자산 목록 */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">최근 등록 자산</h3>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">최근 등록 자산</h3>
         {assets.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">등록된 자산이 없습니다.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center py-8">등록된 자산이 없습니다.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">자산명</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">카테고리</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">제조사</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">위치</th>
+                <tr className="bg-gray-50 dark:bg-gray-700">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">자산명</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">카테고리</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">제조사</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">상태</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">위치</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {assets.slice(0, 5).map(asset => (
                   <tr key={asset.id}>
-                    <td className="px-4 py-3 text-sm text-gray-900">{asset.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{asset.category}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{asset.manufacturer}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{asset.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{asset.category}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{asset.manufacturer}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        asset.status === 'available' ? 'bg-green-100 text-green-800' :
-                        asset.status === 'in-use' ? 'bg-orange-100 text-orange-800' :
-                        asset.status === 'maintenance' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
+                        asset.status === 'available' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                        asset.status === 'in-use' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                        asset.status === 'maintenance' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                       }`}>
                         {asset.status === 'available' ? '사용가능' :
                          asset.status === 'in-use' ? '사용중' :
                          asset.status === 'maintenance' ? '점검중' : '폐기'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{asset.location}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{asset.location}</td>
                   </tr>
                 ))}
               </tbody>
