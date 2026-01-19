@@ -1,9 +1,10 @@
 import type { Asset, Transaction, MaintenanceSchedule } from '../types';
-import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building, QrCode, Wrench, Plus } from 'lucide-react';
+import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building, QrCode, Wrench, Plus, TrendingDown } from 'lucide-react';
 import { formatDate, formatCurrency, getTransactionsByAssetId, getMaintenanceSchedulesByAssetId, saveMaintenanceSchedule, deleteMaintenanceSchedule } from '../utils-supabase';
 import { useState, useEffect } from 'react';
 import QRCodeModal from './QRCodeModal';
 import MaintenanceForm from './MaintenanceForm';
+import DepreciationCalculator from './DepreciationCalculator';
 
 interface AssetDetailProps {
   asset: Asset;
@@ -16,6 +17,7 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
   const [maintenanceSchedules, setMaintenanceSchedules] = useState<MaintenanceSchedule[]>([]);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
+  const [showDepreciation, setShowDepreciation] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<MaintenanceSchedule | undefined>();
 
   useEffect(() => {
@@ -331,17 +333,26 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
           </div>
 
           {/* 하단 버튼 */}
-          <div className="flex justify-between pt-4 border-t">
-            <button
-              onClick={() => setShowQRCode(true)}
-              className="flex items-center gap-2 px-6 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
-            >
-              <QrCode className="w-5 h-5" />
-              QR 코드
-            </button>
+          <div className="flex justify-between pt-4 border-t dark:border-gray-700">
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowQRCode(true)}
+                className="flex items-center gap-2 px-6 py-2 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              >
+                <QrCode className="w-5 h-5" />
+                QR 코드
+              </button>
+              <button
+                onClick={() => setShowDepreciation(true)}
+                className="flex items-center gap-2 px-6 py-2 border-2 border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              >
+                <TrendingDown className="w-5 h-5" />
+                감가상각 계산
+              </button>
+            </div>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               닫기
             </button>
@@ -352,6 +363,11 @@ const AssetDetail = ({ asset, onClose, onTransaction }: AssetDetailProps) => {
       {/* QR 코드 모달 */}
       {showQRCode && (
         <QRCodeModal asset={asset} onClose={() => setShowQRCode(false)} />
+      )}
+      
+      {/* 감가상각 계산 모달 */}
+      {showDepreciation && (
+        <DepreciationCalculator asset={asset} onClose={() => setShowDepreciation(false)} />
       )}
       
       {/* 유지보수 일정 폼 */}
