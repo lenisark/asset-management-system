@@ -68,3 +68,20 @@ export interface Depreciation {
   accumulatedDepreciation: number; // 감가상각누계액
   yearlyDepreciation: number[]; // 연도별 감가상각비
 }
+
+// 알림 타입
+export type NotificationType = 'maintenance' | 'rental' | 'overdue' | 'system';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  assetId?: string;
+  maintenanceScheduleId?: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+  readAt?: string;
+}

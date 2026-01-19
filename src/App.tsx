@@ -10,6 +10,7 @@ import AssetList from './components/AssetList';
 import AssetForm from './components/AssetForm';
 import AssetDetail from './components/AssetDetail';
 import TransactionForm from './components/TransactionForm';
+import { NotificationBell } from './components/NotificationBell';
 import { LayoutDashboard, Package, Plus, AlertCircle, Wifi, LogOut, User, Moon, Sun } from 'lucide-react';
 
 type View = 'dashboard' | 'assets';
@@ -175,6 +176,8 @@ function App() {
                 <User className="w-4 h-4" />
                 <span>{user.email}</span>
               </div>
+              {/* 알림 벨 */}
+              <NotificationBell />
               {/* 테마 전환 버튼 */}
               <button
                 onClick={toggleTheme}

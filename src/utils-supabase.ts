@@ -1,8 +1,8 @@
 import type { Asset, Transaction, MaintenanceSchedule } from './types';
 import { supabase, TABLES } from './supabaseClient';
 
-// 파일명을 안전하게 sanitize하는 함수
-const sanitizeFileName = (fileName: string): string => {
+// 파일명을 안전하게 sanitize하는 함수 (향후 사용 가능)
+export const sanitizeFileName = (fileName: string): string => {
   // 파일명과 확장자 분리
   const parts = fileName.split('.');
   const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : 'jpg';
