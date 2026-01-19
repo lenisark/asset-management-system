@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Asset, AssetCategory, AssetStatus } from '../types';
+import type { Asset } from '../types';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { generateId, uploadAssetImage } from '../utils-supabase';
 

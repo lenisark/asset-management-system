@@ -1,4 +1,4 @@
-import { Asset, Transaction } from '../types';
+import type { Asset, Transaction } from '../types';
 import { X, ArrowUpCircle, ArrowDownCircle, Calendar, User, Building, QrCode } from 'lucide-react';
 import { formatDate, formatCurrency, getTransactionsByAssetId } from '../utils-supabase';
 import { useState, useEffect } from 'react';

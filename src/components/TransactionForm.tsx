@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Asset, Transaction } from '../types';
+import type { Asset, Transaction } from '../types';
 import { X, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { generateId, saveTransaction, saveAsset } from '../utils-supabase';
 

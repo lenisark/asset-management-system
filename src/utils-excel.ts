@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Asset, Transaction, AssetCategory, AssetStatus } from './types';
+import type { Asset, Transaction, AssetCategory, AssetStatus } from './types';
 import { saveAsset, getAssets } from './utils-supabase';
 
 // 자산 목록을 Excel 파일로 내보내기

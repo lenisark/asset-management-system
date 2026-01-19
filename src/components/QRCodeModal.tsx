@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
-import { Asset } from '../types';
+import type { Asset } from '../types';
 import { X, Download, QrCode as QRIcon } from 'lucide-react';
 
 interface QRCodeModalProps {

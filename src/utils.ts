@@ -1,4 +1,4 @@
-import { Asset, Transaction } from './types';
+import type { Asset, Transaction } from './types';
 
 const ASSETS_KEY = 'company_assets';
 const TRANSACTIONS_KEY = 'asset_transactions';

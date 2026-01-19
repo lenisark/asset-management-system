@@ -1,4 +1,4 @@
-import { Asset, AssetCategory, DashboardStats } from '../types';
+import type { Asset, AssetCategory, DashboardStats } from '../types';
 import { Package, Monitor, Laptop, Wrench, Box } from 'lucide-react';
 import {
   Chart as ChartJS,

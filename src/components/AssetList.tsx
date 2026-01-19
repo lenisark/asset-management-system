@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Asset, AssetCategory, AssetStatus } from '../types';
+import type { Asset, AssetCategory, AssetStatus } from '../types';
 import { Search, Edit, Trash2, Eye, Download, Upload, FileSpreadsheet } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils';
 import { exportAssetsToExcel, importAssetsFromExcel, downloadAssetTemplate } from '../utils-excel';

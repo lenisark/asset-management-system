@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Asset } from './types';
+import type { Asset } from './types';
 import { getAssets, saveAsset, deleteAsset } from './utils-supabase';
 import { supabase, TABLES } from './supabaseClient';
 import { useAuth } from './AuthContext';

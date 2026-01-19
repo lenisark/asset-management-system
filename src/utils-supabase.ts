@@ -1,4 +1,4 @@
-import { Asset, Transaction, MaintenanceSchedule } from './types';
+import type { Asset, Transaction, MaintenanceSchedule } from './types';
 import { supabase, TABLES } from './supabaseClient';
 
 // 자산 관리
