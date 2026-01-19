@@ -1,6 +1,26 @@
 import type { Asset, Transaction, MaintenanceSchedule } from './types';
 import { supabase, TABLES } from './supabaseClient';
 
+// 파일명을 안전하게 sanitize하는 함수
+const sanitizeFileName = (fileName: string): string => {
+  // 파일명과 확장자 분리
+  const parts = fileName.split('.');
+  const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : 'jpg';
+  const baseName = parts.join('.');
+  
+  // 한글, 공백, 특수문자를 언더스코어로 변경
+  // 영문, 숫자, 하이픈, 언더스코어만 허용
+  const safeName = baseName
+    .replace(/[^\w\s-]/g, '_')  // 특수문자 → _
+    .replace(/[\s]+/g, '_')      // 공백 → _
+    .replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g, '_'); // 한글 → _
+  
+  // 연속된 언더스코어 제거
+  const cleanName = safeName.replace(/_+/g, '_').replace(/^_|_$/g, '');
+  
+  return `${cleanName || 'image'}.${ext}`;
+};
+
 // 자산 관리
 export const getAssets = async (): Promise<Asset[]> => {
   const { data, error } = await supabase
@@ -192,9 +212,36 @@ export const getTransactionsByAssetId = async (assetId: string): Promise<Transac
 // 이미지 업로드
 export const uploadAssetImage = async (file: File, assetId: string): Promise<string | null> => {
   try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${assetId}-${Date.now()}.${fileExt}`;
+    // 허용된 이미지 확장자 목록
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+    
+    // 원본 파일명에서 확장자 추출
+    const originalExt = file.name.split('.').pop()?.toLowerCase() || '';
+    
+    // 확장자가 허용된 것인지 확인, 아니면 MIME 타입에서 추출
+    let fileExt = allowedExtensions.includes(originalExt) ? originalExt : null;
+    
+    // 확장자가 없으면 MIME 타입에서 추출
+    if (!fileExt) {
+      const mimeToExt: { [key: string]: string } = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/gif': 'gif',
+        'image/webp': 'webp',
+        'image/bmp': 'bmp',
+        'image/svg+xml': 'svg'
+      };
+      fileExt = mimeToExt[file.type] || 'jpg';
+    }
+    
+    // 안전한 파일명 생성: assetId-timestamp-random.확장자
+    // 한글이나 특수문자 없이 영문, 숫자, 하이픈만 사용
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const fileName = `${assetId}-${timestamp}-${randomStr}.${fileExt}`;
     const filePath = `assets/${fileName}`;
+
+    console.log('Uploading file:', fileName, 'Type:', file.type);
 
     const { error: uploadError } = await supabase.storage
       .from('asset-images')

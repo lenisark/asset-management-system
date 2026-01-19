@@ -149,10 +149,11 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
               
               {/* 업로드 버튼 */}
               <div className="flex-1">
-                <label className="flex flex-col items-center px-4 py-6 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-600">이미지 선택 또는 드래그</span>
-                  <span className="text-xs text-gray-400 mt-1">PNG, JPG (최대 5MB)</span>
+                <label className="flex flex-col items-center px-4 py-6 bg-white dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mb-2" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">이미지 선택 또는 드래그</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG, JPG, GIF, WebP (최대 5MB)</span>
+                  <span className="text-xs text-blue-500 dark:text-blue-400 mt-1">💡 한글 파일명도 자동으로 변환됩니다</span>
                   <input
                     type="file"
                     accept="image/*"
