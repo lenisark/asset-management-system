@@ -184,17 +184,6 @@ export const downloadAssetTemplate = () => {
     ];
     worksheet['!cols'] = columnWidths;
 
-    // 주석 셀 추가 (A열 아래에)
-    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-    const commentRow = range.e.r + 2; // 데이터 다음 다음 행
-    
-    worksheet[`A${commentRow}`] = { v: '※ 카테고리: PC/데스크톱, Laptop/노트북, Monitor/모니터, Keyboard/키보드, Mouse/마우스, Printer/프린터, Tablet/태블릿, Phone/휴대폰, Cable/케이블, Other/기타 (한글/영어 모두 입력 가능)', t: 's' };
-    worksheet[`A${commentRow + 1}`] = { v: '※ 상태: available/사용가능, in-use/사용중, maintenance/점검중, disposed/폐기 (한글/영어 모두 입력 가능)', t: 's' };
-    
-    // 범위 업데이트
-    range.e.r = commentRow + 1;
-    worksheet['!ref'] = XLSX.utils.encode_range(range);
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, '자산등록템플릿');
 
