@@ -100,24 +100,24 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-800">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl my-4 sm:my-8 max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
             {asset ? '자산 수정' : '자산 등록'}
           </h2>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {/* 이미지 업로드 섹션 */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               자산 이미지
             </label>
             <div className="flex items-start gap-4">
@@ -142,8 +142,8 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                   </button>
                 </div>
               ) : (
-                <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                  <ImageIcon className="w-12 h-12 text-gray-400" />
+                <div className="w-32 h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50 dark:bg-gray-700">
+                  <ImageIcon className="w-12 h-12 text-gray-400 dark:text-gray-500" />
                 </div>
               )}
               
@@ -167,7 +167,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 자산명 <span className="text-red-500">*</span>
               </label>
               <input
@@ -176,13 +176,13 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="예: Dell OptiPlex 7090"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 카테고리 <span className="text-red-500">*</span>
               </label>
               <select
@@ -190,18 +190,26 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="PC">PC</option>
+                <option value="PC">PC (데스크톱)</option>
+                <option value="Laptop">노트북</option>
                 <option value="Monitor">모니터</option>
                 <option value="Keyboard">키보드</option>
                 <option value="Mouse">마우스</option>
+                <option value="Printer">프린터</option>
+                <option value="Scanner">스캐너</option>
+                <option value="Tablet">태블릿</option>
+                <option value="Phone">휴대폰</option>
+                <option value="Headset">헤드셋</option>
+                <option value="Cable">케이블</option>
+                <option value="Docking">도킹스테이션</option>
                 <option value="Other">기타</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 시리얼 번호 <span className="text-red-500">*</span>
               </label>
               <input
@@ -210,13 +218,13 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.serialNumber}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                 placeholder="예: SN123456789"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 제조사 <span className="text-red-500">*</span>
               </label>
               <input
@@ -225,13 +233,13 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.manufacturer}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="예: Dell, Samsung, LG"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 구매일 <span className="text-red-500">*</span>
               </label>
               <input
@@ -240,12 +248,12 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.purchaseDate}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 구매금액 (원) <span className="text-red-500">*</span>
               </label>
               <input
@@ -255,13 +263,13 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 onChange={handleChange}
                 required
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 상태 <span className="text-red-500">*</span>
               </label>
               <select
@@ -269,7 +277,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.status}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="available">사용 가능</option>
                 <option value="in-use">사용 중</option>
@@ -279,7 +287,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 위치 <span className="text-red-500">*</span>
               </label>
               <input
@@ -288,14 +296,14 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 value={formData.location}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="예: 본사 3층 개발팀"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               비고
             </label>
             <textarea
@@ -303,7 +311,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="추가 정보 입력..."
             />
           </div>
@@ -313,7 +321,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
               type="button"
               onClick={onCancel}
               disabled={uploading}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
             >
               취소
             </button>

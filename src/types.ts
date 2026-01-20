@@ -1,5 +1,18 @@
 // 자산 타입 정의
-export type AssetCategory = 'PC' | 'Monitor' | 'Keyboard' | 'Mouse' | 'Other';
+export type AssetCategory = 
+  | 'PC' 
+  | 'Monitor' 
+  | 'Keyboard' 
+  | 'Mouse' 
+  | 'Printer'      // 프린터 추가
+  | 'Scanner'      // 스캐너 추가
+  | 'Laptop'       // 노트북 추가
+  | 'Tablet'       // 태블릿 추가
+  | 'Phone'        // 휴대폰 추가
+  | 'Headset'      // 헤드셋 추가
+  | 'Cable'        // 케이블 추가
+  | 'Docking'      // 도킹스테이션 추가
+  | 'Other';
 
 export type AssetStatus = 'available' | 'in-use' | 'maintenance' | 'disposed';
 

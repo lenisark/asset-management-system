@@ -5,6 +5,17 @@ import { saveAsset, getAssets } from './utils-supabase';
 // 자산 목록을 Excel 파일로 내보내기
 export const exportAssetsToExcel = (assets: Asset[]) => {
   try {
+    // 상태 한글 변환 함수
+    const getStatusKorean = (status: AssetStatus): string => {
+      const statusMap: Record<AssetStatus, string> = {
+        'available': '사용가능',
+        'in-use': '사용중',
+        'maintenance': '점검중',
+        'disposed': '폐기'
+      };
+      return statusMap[status] || status;
+    };
+
     // 데이터를 Excel 형식에 맞게 변환
     const data = assets.map((asset) => ({
       '자산명': asset.name,
@@ -13,7 +24,7 @@ export const exportAssetsToExcel = (assets: Asset[]) => {
       '제조사': asset.manufacturer,
       '구매일자': asset.purchaseDate,
       '구매가격': asset.purchasePrice,
-      '상태': asset.status,
+      '상태': getStatusKorean(asset.status), // 한글로 변환
       '위치': asset.location,
       '비고': asset.notes || '',
       '등록일': new Date(asset.createdAt).toLocaleDateString('ko-KR'),

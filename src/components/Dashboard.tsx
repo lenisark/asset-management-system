@@ -54,6 +54,14 @@ const Dashboard = ({ assets }: DashboardProps) => {
       Monitor: assets.filter(a => a.category === 'Monitor').length,
       Keyboard: assets.filter(a => a.category === 'Keyboard').length,
       Mouse: assets.filter(a => a.category === 'Mouse').length,
+      Printer: assets.filter(a => a.category === 'Printer').length,
+      Scanner: assets.filter(a => a.category === 'Scanner').length,
+      Laptop: assets.filter(a => a.category === 'Laptop').length,
+      Tablet: assets.filter(a => a.category === 'Tablet').length,
+      Phone: assets.filter(a => a.category === 'Phone').length,
+      Headset: assets.filter(a => a.category === 'Headset').length,
+      Cable: assets.filter(a => a.category === 'Cable').length,
+      Docking: assets.filter(a => a.category === 'Docking').length,
       Other: assets.filter(a => a.category === 'Other').length,
     }
   };
@@ -67,6 +75,14 @@ const Dashboard = ({ assets }: DashboardProps) => {
     Monitor: <Monitor className="w-6 h-6" />,
     Keyboard: <Box className="w-6 h-6" />,
     Mouse: <Box className="w-6 h-6" />,
+    Printer: <Package className="w-6 h-6" />,
+    Scanner: <Package className="w-6 h-6" />,
+    Laptop: <Laptop className="w-6 h-6" />,
+    Tablet: <Monitor className="w-6 h-6" />,
+    Phone: <Package className="w-6 h-6" />,
+    Headset: <Wrench className="w-6 h-6" />,
+    Cable: <Box className="w-6 h-6" />,
+    Docking: <Package className="w-6 h-6" />,
     Other: <Package className="w-6 h-6" />,
   };
 
