@@ -335,3 +335,128 @@ export const importAssetsFromExcel = async (file: File): Promise<{
     reader.readAsBinaryString(file);
   });
 };
+
+/**
+ * 감가상각 보고서 Excel 다운로드
+ */
+export const exportDepreciationReport = (assets: Asset[]) => {
+  try {
+    // 감가상각 계산 (정액법 - 5년 내용연수)
+    const reportData = assets.map((asset, index) => {
+      const purchaseDate = new Date(asset.purchaseDate);
+      const currentDate = new Date();
+      const yearsElapsed = (currentDate.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
+      
+      const usefulLife = 5; // 5년 내용연수
+      const salvageValue = asset.purchasePrice * 0.1; // 잔존가치 10%
+      const depreciableAmount = asset.purchasePrice - salvageValue;
+      const annualDepreciation = depreciableAmount / usefulLife;
+      const accumulatedDepreciation = Math.min(annualDepreciation * yearsElapsed, depreciableAmount);
+      const bookValue = asset.purchasePrice - accumulatedDepreciation;
+
+      return {
+        '번호': index + 1,
+        '자산명': asset.name,
+        '카테고리': asset.category,
+        '구매일자': asset.purchaseDate,
+        '원가': asset.purchasePrice,
+        '연간감가상각비': Math.round(annualDepreciation),
+        '누적감가상각액': Math.round(accumulatedDepreciation),
+        '장부가액': Math.round(Math.max(bookValue, salvageValue)),
+        '사용연수': `${Math.min(yearsElapsed, usefulLife).toFixed(1)}/${usefulLife}년`,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(reportData);
+
+    const columnWidths = [
+      { wch: 8 },  // 번호
+      { wch: 25 }, // 자산명
+      { wch: 15 }, // 카테고리
+      { wch: 15 }, // 구매일자
+      { wch: 15 }, // 원가
+      { wch: 15 }, // 연간감가상각비
+      { wch: 15 }, // 누적감가상각액
+      { wch: 15 }, // 장부가액
+      { wch: 15 }, // 사용연수
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '감가상각보고서');
+
+    const fileName = `감가상각보고서_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+
+    return true;
+  } catch (error) {
+    console.error('감가상각 보고서 생성 실패:', error);
+    return false;
+  }
+};
+
+/**
+ * 카테고리별 통계 보고서 Excel 다운로드
+ */
+export const exportCategoryReport = (assets: Asset[]) => {
+  try {
+    // 카테고리별 집계
+    const categoryStats = assets.reduce((acc, asset) => {
+      if (!acc[asset.category]) {
+        acc[asset.category] = {
+          count: 0,
+          totalValue: 0,
+          available: 0,
+          inUse: 0,
+          maintenance: 0,
+          disposed: 0,
+        };
+      }
+      acc[asset.category].count++;
+      acc[asset.category].totalValue += asset.purchasePrice;
+      
+      if (asset.status === 'available') acc[asset.category].available++;
+      else if (asset.status === 'in-use') acc[asset.category].inUse++;
+      else if (asset.status === 'maintenance') acc[asset.category].maintenance++;
+      else if (asset.status === 'disposed') acc[asset.category].disposed++;
+      
+      return acc;
+    }, {} as Record<string, any>);
+
+    const reportData = Object.entries(categoryStats).map(([category, stats]) => ({
+      '카테고리': category,
+      '자산수': stats.count,
+      '총가치': stats.totalValue,
+      '평균가치': Math.round(stats.totalValue / stats.count),
+      '사용가능': stats.available,
+      '사용중': stats.inUse,
+      '점검중': stats.maintenance,
+      '폐기': stats.disposed,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(reportData);
+
+    const columnWidths = [
+      { wch: 15 }, // 카테고리
+      { wch: 10 }, // 자산수
+      { wch: 15 }, // 총가치
+      { wch: 15 }, // 평균가치
+      { wch: 10 }, // 사용가능
+      { wch: 10 }, // 사용중
+      { wch: 10 }, // 점검중
+      { wch: 10 }, // 폐기
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '카테고리별통계');
+
+    const fileName = `카테고리별통계_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+
+    return true;
+  } catch (error) {
+    console.error('카테고리별 통계 보고서 생성 실패:', error);
+    return false;
+  }
+};
