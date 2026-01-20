@@ -1,5 +1,6 @@
 import type { Asset, AssetCategory, DashboardStats } from '../types';
 import { Package, Monitor, Laptop, Wrench, Box } from 'lucide-react';
+import { useTheme } from '../ThemeContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -44,6 +45,9 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ assets }: DashboardProps) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const stats: DashboardStats = {
     totalAssets: assets.length,
     availableAssets: assets.filter(a => a.status === 'available').length,
@@ -55,13 +59,10 @@ const Dashboard = ({ assets }: DashboardProps) => {
       Keyboard: assets.filter(a => a.category === 'Keyboard').length,
       Mouse: assets.filter(a => a.category === 'Mouse').length,
       Printer: assets.filter(a => a.category === 'Printer').length,
-      Scanner: assets.filter(a => a.category === 'Scanner').length,
       Laptop: assets.filter(a => a.category === 'Laptop').length,
       Tablet: assets.filter(a => a.category === 'Tablet').length,
       Phone: assets.filter(a => a.category === 'Phone').length,
-      Headset: assets.filter(a => a.category === 'Headset').length,
       Cable: assets.filter(a => a.category === 'Cable').length,
-      Docking: assets.filter(a => a.category === 'Docking').length,
       Other: assets.filter(a => a.category === 'Other').length,
     }
   };
@@ -76,13 +77,10 @@ const Dashboard = ({ assets }: DashboardProps) => {
     Keyboard: <Box className="w-6 h-6" />,
     Mouse: <Box className="w-6 h-6" />,
     Printer: <Package className="w-6 h-6" />,
-    Scanner: <Package className="w-6 h-6" />,
     Laptop: <Laptop className="w-6 h-6" />,
     Tablet: <Monitor className="w-6 h-6" />,
     Phone: <Package className="w-6 h-6" />,
-    Headset: <Wrench className="w-6 h-6" />,
     Cable: <Box className="w-6 h-6" />,
-    Docking: <Package className="w-6 h-6" />,
     Other: <Package className="w-6 h-6" />,
   };
 
@@ -217,23 +215,24 @@ const Dashboard = ({ assets }: DashboardProps) => {
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={assetValueTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
               <XAxis 
                 dataKey="month" 
                 tickFormatter={formatMonthLabel}
-                stroke="#6b7280"
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
               />
               <YAxis 
                 tickFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
-                stroke="#6b7280"
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
               />
               <RechartsTooltip 
                 formatter={(value) => [formatCurrency(Number(value)), '자산 가치']}
                 labelFormatter={formatMonthLabel}
                 contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px'
+                  backgroundColor: isDark ? '#1f2937' : '#fff', 
+                  border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '6px',
+                  color: isDark ? '#f9fafb' : '#111827'
                 }}
               />
               <Line 
@@ -255,23 +254,24 @@ const Dashboard = ({ assets }: DashboardProps) => {
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <RechartsBar data={monthlyPurchaseData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
               <XAxis 
                 dataKey="month" 
                 tickFormatter={formatMonthLabel}
-                stroke="#6b7280"
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
               />
               <YAxis 
                 tickFormatter={(value) => `${(value / 10000).toFixed(0)}만`}
-                stroke="#6b7280"
+                stroke={isDark ? '#9ca3af' : '#6b7280'}
               />
               <RechartsTooltip 
                 formatter={(value) => [formatCurrency(Number(value)), '구매 금액']}
                 labelFormatter={formatMonthLabel}
                 contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px'
+                  backgroundColor: isDark ? '#1f2937' : '#fff', 
+                  border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '6px',
+                  color: isDark ? '#f9fafb' : '#111827'
                 }}
               />
               <RechartsBarElement 

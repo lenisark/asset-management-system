@@ -198,12 +198,9 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
                 <option value="Keyboard">키보드</option>
                 <option value="Mouse">마우스</option>
                 <option value="Printer">프린터</option>
-                <option value="Scanner">스캐너</option>
                 <option value="Tablet">태블릿</option>
                 <option value="Phone">휴대폰</option>
-                <option value="Headset">헤드셋</option>
                 <option value="Cable">케이블</option>
-                <option value="Docking">도킹스테이션</option>
                 <option value="Other">기타</option>
               </select>
             </div>
