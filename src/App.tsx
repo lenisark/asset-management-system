@@ -28,10 +28,46 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isRealtime, setIsRealtime] = useState(false);
 
-  // 인증되지 않은 경우 로그인 페이지 표시
+  useEffect(() => {
+    // 사용자가 로그인되어 있을 때만 자산 로드
+    if (user) {
+      loadAssets();
+      
+      // Supabase Realtime 구독
+      const channel = supabase
+        .channel('assets-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: TABLES.ASSETS },
+          (payload) => {
+            console.log('Realtime change:', payload);
+            setIsRealtime(true);
+            setTimeout(() => setIsRealtime(false), 2000);
+            
+            if (payload.eventType === 'INSERT') {
+              loadAssets(); // 새 자산 추가 시 전체 재로드
+            } else if (payload.eventType === 'UPDATE') {
+              loadAssets(); // 자산 업데이트 시 전체 재로드
+            } else if (payload.eventType === 'DELETE') {
+              loadAssets(); // 자산 삭제 시 전체 재로드
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Realtime subscription status:', status);
+        });
+
+      // 클린업
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  // 인증되지 않은 경우 로그인 페이지 표시 (모든 Hook 이후)
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -40,39 +76,6 @@ function App() {
   if (!user) {
     return <AuthPage />;
   }
-
-  useEffect(() => {
-    loadAssets();
-    
-    // Supabase Realtime 구독
-    const channel = supabase
-      .channel('assets-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: TABLES.ASSETS },
-        (payload) => {
-          console.log('Realtime change:', payload);
-          setIsRealtime(true);
-          setTimeout(() => setIsRealtime(false), 2000);
-          
-          if (payload.eventType === 'INSERT') {
-            loadAssets(); // 새 자산 추가 시 전체 재로드
-          } else if (payload.eventType === 'UPDATE') {
-            loadAssets(); // 자산 업데이트 시 전체 재로드
-          } else if (payload.eventType === 'DELETE') {
-            loadAssets(); // 자산 삭제 시 전체 재로드
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-      });
-
-    // 클린업
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const loadAssets = async () => {
     try {
