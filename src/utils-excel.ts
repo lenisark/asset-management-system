@@ -133,24 +133,31 @@ export const downloadAssetTemplate = () => {
     const worksheet = XLSX.utils.json_to_sheet(templateData);
 
     const columnWidths = [
-      { wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 15 },
-      { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 30 },
+      { wch: 20 }, // 자산명
+      { wch: 15 }, // 카테고리
+      { wch: 20 }, // 시리얼번호
+      { wch: 15 }, // 제조사
+      { wch: 15 }, // 구매일자
+      { wch: 15 }, // 구매가격
+      { wch: 12 }, // 상태
+      { wch: 20 }, // 위치
+      { wch: 30 }, // 비고
     ];
     worksheet['!cols'] = columnWidths;
 
-    // 헤더에 설명 추가
-    const instructions = [
-      ['자산 등록 템플릿 - 아래 예시를 참고하여 작성해주세요'],
-      ['카테고리: PC, Monitor, Keyboard, Mouse, Other'],
-      ['상태: available(사용가능), in-use(사용중), maintenance(점검중), disposed(폐기)'],
-      [''],
-    ];
-
-    const instructionSheet = XLSX.utils.aoa_to_sheet(instructions);
-    XLSX.utils.sheet_add_json(instructionSheet, templateData, { origin: 'A5' });
+    // 주석 셀 추가 (A열 아래에)
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    const commentRow = range.e.r + 2; // 데이터 다음 다음 행
+    
+    worksheet[`A${commentRow}`] = { v: '※ 카테고리: PC, Laptop, Monitor, Keyboard, Mouse, Printer, Tablet, Phone, Cable, Other', t: 's' };
+    worksheet[`A${commentRow + 1}`] = { v: '※ 상태: available(사용가능), in-use(사용중), maintenance(점검중), disposed(폐기)', t: 's' };
+    
+    // 범위 업데이트
+    range.e.r = commentRow + 1;
+    worksheet['!ref'] = XLSX.utils.encode_range(range);
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, instructionSheet, '자산등록템플릿');
+    XLSX.utils.book_append_sheet(workbook, worksheet, '자산등록템플릿');
 
     XLSX.writeFile(workbook, '자산등록템플릿.xlsx');
 
@@ -221,9 +228,9 @@ export const importAssetsFromExcel = async (file: File): Promise<{
             }
 
             // 카테고리 유효성 검사
-            const validCategories: AssetCategory[] = ['PC', 'Monitor', 'Keyboard', 'Mouse', 'Other'];
+            const validCategories: AssetCategory[] = ['PC', 'Laptop', 'Monitor', 'Keyboard', 'Mouse', 'Printer', 'Tablet', 'Phone', 'Cable', 'Other'];
             if (!validCategories.includes(row['카테고리'])) {
-              errors.push(`${rowNum}행: 카테고리는 PC, Monitor, Keyboard, Mouse, Other 중 하나여야 합니다.`);
+              errors.push(`${rowNum}행: 카테고리는 PC, Laptop, Monitor, Keyboard, Mouse, Printer, Tablet, Phone, Cable, Other 중 하나여야 합니다.`);
               continue;
             }
 
