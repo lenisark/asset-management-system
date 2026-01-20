@@ -2,6 +2,45 @@ import * as XLSX from 'xlsx';
 import type { Asset, Transaction, AssetCategory, AssetStatus } from './types';
 import { saveAsset, getAssets } from './utils-supabase';
 
+// 한글 카테고리 → 영어 카테고리 변환
+const categoryKoreanToEnglish: Record<string, AssetCategory> = {
+  'PC': 'PC',
+  '데스크톱': 'PC',
+  '노트북': 'Laptop',
+  'Laptop': 'Laptop',
+  '모니터': 'Monitor',
+  'Monitor': 'Monitor',
+  '키보드': 'Keyboard',
+  'Keyboard': 'Keyboard',
+  '마우스': 'Mouse',
+  'Mouse': 'Mouse',
+  '프린터': 'Printer',
+  'Printer': 'Printer',
+  '태블릿': 'Tablet',
+  'Tablet': 'Tablet',
+  '휴대폰': 'Phone',
+  'Phone': 'Phone',
+  '케이블': 'Cable',
+  'Cable': 'Cable',
+  '기타': 'Other',
+  'Other': 'Other',
+};
+
+// 한글 상태 → 영어 상태 변환
+const statusKoreanToEnglish: Record<string, AssetStatus> = {
+  '사용가능': 'available',
+  '사용 가능': 'available',
+  'available': 'available',
+  '사용중': 'in-use',
+  '사용 중': 'in-use',
+  'in-use': 'in-use',
+  '점검중': 'maintenance',
+  '점검 중': 'maintenance',
+  'maintenance': 'maintenance',
+  '폐기': 'disposed',
+  'disposed': 'disposed',
+};
+
 // 자산 목록을 Excel 파일로 내보내기
 export const exportAssetsToExcel = (assets: Asset[]) => {
   try {
@@ -113,18 +152,18 @@ export const downloadAssetTemplate = () => {
         '제조사': 'Dell',
         '구매일자': '2024-01-15',
         '구매가격': 1500000,
-        '상태': 'available',
+        '상태': '사용가능',
         '위치': '본사 3층 개발팀',
         '비고': '개발용 PC',
       },
       {
         '자산명': 'LG 27인치 모니터',
-        '카테고리': 'Monitor',
+        '카테고리': '모니터',
         '시리얼번호': 'SN-MON-001',
         '제조사': 'LG',
         '구매일자': '2024-01-20',
         '구매가격': 350000,
-        '상태': 'available',
+        '상태': '사용가능',
         '위치': '본사 3층 개발팀',
         '비고': '',
       },
@@ -149,8 +188,8 @@ export const downloadAssetTemplate = () => {
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
     const commentRow = range.e.r + 2; // 데이터 다음 다음 행
     
-    worksheet[`A${commentRow}`] = { v: '※ 카테고리: PC, Laptop, Monitor, Keyboard, Mouse, Printer, Tablet, Phone, Cable, Other', t: 's' };
-    worksheet[`A${commentRow + 1}`] = { v: '※ 상태: available(사용가능), in-use(사용중), maintenance(점검중), disposed(폐기)', t: 's' };
+    worksheet[`A${commentRow}`] = { v: '※ 카테고리: PC/데스크톱, Laptop/노트북, Monitor/모니터, Keyboard/키보드, Mouse/마우스, Printer/프린터, Tablet/태블릿, Phone/휴대폰, Cable/케이블, Other/기타 (한글/영어 모두 입력 가능)', t: 's' };
+    worksheet[`A${commentRow + 1}`] = { v: '※ 상태: available/사용가능, in-use/사용중, maintenance/점검중, disposed/폐기 (한글/영어 모두 입력 가능)', t: 's' };
     
     // 범위 업데이트
     range.e.r = commentRow + 1;
@@ -227,17 +266,23 @@ export const importAssetsFromExcel = async (file: File): Promise<{
               continue;
             }
 
-            // 카테고리 유효성 검사
-            const validCategories: AssetCategory[] = ['PC', 'Laptop', 'Monitor', 'Keyboard', 'Mouse', 'Printer', 'Tablet', 'Phone', 'Cable', 'Other'];
-            if (!validCategories.includes(row['카테고리'])) {
-              errors.push(`${rowNum}행: 카테고리는 PC, Laptop, Monitor, Keyboard, Mouse, Printer, Tablet, Phone, Cable, Other 중 하나여야 합니다.`);
+            // 카테고리 변환 (한글 → 영어)
+            const inputCategory = row['카테고리']?.trim();
+            const category = categoryKoreanToEnglish[inputCategory];
+            
+            if (!category) {
+              errors.push(`${rowNum}행: 카테고리가 올바르지 않습니다. (입력값: ${inputCategory})`);
+              errors.push(`  허용: PC/데스크톱, Laptop/노트북, Monitor/모니터, Keyboard/키보드, Mouse/마우스, Printer/프린터, Tablet/태블릿, Phone/휴대폰, Cable/케이블, Other/기타`);
               continue;
             }
 
-            // 상태 유효성 검사
-            const validStatuses: AssetStatus[] = ['available', 'in-use', 'maintenance', 'disposed'];
-            if (row['상태'] && !validStatuses.includes(row['상태'])) {
-              errors.push(`${rowNum}행: 상태는 available, in-use, maintenance, disposed 중 하나여야 합니다.`);
+            // 상태 변환 (한글 → 영어)
+            const inputStatus = row['상태']?.trim() || '사용가능';
+            const status = statusKoreanToEnglish[inputStatus];
+            
+            if (!status) {
+              errors.push(`${rowNum}행: 상태가 올바르지 않습니다. (입력값: ${inputStatus})`);
+              errors.push(`  허용: available/사용가능, in-use/사용중, maintenance/점검중, disposed/폐기`);
               continue;
             }
 
@@ -250,14 +295,14 @@ export const importAssetsFromExcel = async (file: File): Promise<{
             // 자산 객체 생성
             const newAsset: Omit<Asset, 'id' | 'createdAt' | 'updatedAt'> = {
               name: row['자산명'],
-              category: row['카테고리'],
+              category: category, // 변환된 영어 카테고리
               serialNumber: row['시리얼번호'],
               manufacturer: row['제조사'],
               purchaseDate: typeof row['구매일자'] === 'string' 
                 ? row['구매일자'] 
                 : new Date(row['구매일자']).toISOString().split('T')[0],
               purchasePrice: Number(row['구매가격']),
-              status: row['상태'] || 'available',
+              status: status, // 변환된 영어 상태
               location: row['위치'],
               notes: row['비고'] || '',
             };

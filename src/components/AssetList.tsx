@@ -33,6 +33,23 @@ const AssetList = ({ assets, onEdit, onDelete, onView, onReload }: AssetListProp
   const [sortField, setSortField] = useState<SortField>('purchaseDate');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
+  // 등록된 자산의 카테고리만 추출 (동적 필터)
+  const availableCategories = Array.from(new Set(assets.map(a => a.category)));
+  
+  // 카테고리 한글 이름 매핑
+  const categoryNames: Record<AssetCategory, string> = {
+    'PC': 'PC (데스크톱)',
+    'Laptop': '노트북',
+    'Monitor': '모니터',
+    'Keyboard': '키보드',
+    'Mouse': '마우스',
+    'Printer': '프린터',
+    'Tablet': '태블릿',
+    'Phone': '휴대폰',
+    'Cable': '케이블',
+    'Other': '기타',
+  };
+
   const filteredAssets = assets.filter(asset => {
     const matchesSearch = 
       asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -269,11 +286,11 @@ const AssetList = ({ assets, onEdit, onDelete, onView, onReload }: AssetListProp
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">모든 카테고리</option>
-            <option value="PC">PC</option>
-            <option value="Monitor">모니터</option>
-            <option value="Keyboard">키보드</option>
-            <option value="Mouse">마우스</option>
-            <option value="Other">기타</option>
+            {availableCategories.map(category => (
+              <option key={category} value={category}>
+                {categoryNames[category]}
+              </option>
+            ))}
           </select>
           
           <select
