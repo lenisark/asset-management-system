@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import type { Asset, AssetCategory, AssetStatus } from '../types';
-import { Search, Edit, Trash2, Eye, Download, Upload, FileSpreadsheet, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Edit, Trash2, Eye, Download, Upload, FileSpreadsheet, SlidersHorizontal, X, FileText } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils';
 import { exportAssetsToExcel, importAssetsFromExcel, downloadAssetTemplate } from '../utils-excel';
+import { generateAssetListPDF, generateDepreciationPDF, generateCategoryReportPDF } from '../utils-pdf';
 
 interface AssetListProps {
   assets: Asset[];
@@ -175,7 +176,40 @@ const AssetList = ({ assets, onEdit, onDelete, onView, onReload }: AssetListProp
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">자산 목록</h2>
         
         {/* Excel 내보내기/가져오기 버튼 */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {/* PDF 다운로드 버튼 */}
+          <div className="relative group">
+            <button
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              title="PDF 보고서"
+            >
+              <FileText className="w-4 h-4" />
+              PDF 보고서
+            </button>
+            
+            {/* PDF 드롭다운 메뉴 */}
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+              <button
+                onClick={() => generateAssetListPDF(filteredAssets)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-t-lg"
+              >
+                📄 자산 목록
+              </button>
+              <button
+                onClick={() => generateDepreciationPDF(filteredAssets)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+              >
+                📊 감가상각 보고서
+              </button>
+              <button
+                onClick={() => generateCategoryReportPDF(filteredAssets)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-b-lg"
+              >
+                📈 카테고리별 통계
+              </button>
+            </div>
+          </div>
+
           <button
             onClick={handleExport}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

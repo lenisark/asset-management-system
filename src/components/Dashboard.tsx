@@ -1,6 +1,7 @@
 import type { Asset, AssetCategory, DashboardStats } from '../types';
-import { Package, Monitor, Laptop, Wrench, Box } from 'lucide-react';
+import { Package, Monitor, Laptop, Wrench, Box, FileText } from 'lucide-react';
 import { useTheme } from '../ThemeContext';
+import { generateAssetListPDF, generateDepreciationPDF, generateCategoryReportPDF } from '../utils-pdf';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -142,7 +143,42 @@ const Dashboard = ({ assets }: DashboardProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">대시보드</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">대시보드</h2>
+        
+        {/* PDF 다운로드 버튼 */}
+        <div className="relative group">
+          <button
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            title="PDF 보고서"
+          >
+            <FileText className="w-4 h-4" />
+            PDF 보고서
+          </button>
+          
+          {/* PDF 드롭다운 메뉴 */}
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+            <button
+              onClick={() => generateAssetListPDF(assets)}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-t-lg"
+            >
+              📄 자산 목록
+            </button>
+            <button
+              onClick={() => generateDepreciationPDF(assets)}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              📊 감가상각 보고서
+            </button>
+            <button
+              onClick={() => generateCategoryReportPDF(assets)}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-b-lg"
+            >
+              📈 카테고리별 통계
+            </button>
+          </div>
+        </div>
+      </div>
       
       {/* 상태별 통계 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
