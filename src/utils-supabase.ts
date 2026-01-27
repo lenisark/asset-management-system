@@ -105,6 +105,15 @@ export const saveAsset = async (asset: Asset): Promise<{ success: boolean; error
       errorMessage = field 
         ? `필수 항목이 누락되었습니다: ${field}` 
         : '필수 항목을 모두 입력해주세요.';
+    } else if (result.error.code === '23514' || result.error.message.includes('check constraint')) {
+      // Check constraint violation (카테고리나 상태 값 오류)
+      if (result.error.message.includes('category')) {
+        errorMessage = '올바르지 않은 카테고리입니다. 데이터베이스 스키마를 업데이트해주세요.';
+      } else if (result.error.message.includes('status')) {
+        errorMessage = '올바르지 않은 상태 값입니다.';
+      } else {
+        errorMessage = '입력값이 데이터베이스 제약 조건을 위반했습니다.';
+      }
     } else if (result.error.message.includes('timeout')) {
       errorMessage = '서버 응답 시간이 초과되었습니다. 다시 시도해주세요.';
     } else if (result.error.message.includes('network')) {

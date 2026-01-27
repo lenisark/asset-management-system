@@ -220,13 +220,23 @@ Supabase 대시보드 → SQL Editor에서 스크립트 실행
 -- maintenance_schedules 테이블 생성 및 RLS 정책 설정
 ```
 
+#### 📦 카테고리 확장 업데이트 (v2.3+)
+`supabase-category-update.sql` 파일 내용을 복사하여 실행
+
+```sql
+-- 자산 카테고리에 Printer, Laptop, Tablet, Phone, Cable 추가
+-- 기존 데이터는 유지됩니다
+```
+
 **⚠️ 주의**: 
 - `supabase-schema.sql`: 전체 스키마 (처음 설치용)
 - `supabase-notifications.sql`: 알림 시스템 (필수!)
 - `supabase-update.sql`: 업데이트만 (기존 DB용)
+- `supabase-category-update.sql`: 카테고리 확장 (필수!)
 
 **오류 해결**:
 - "policy already exists" 오류가 나면 `supabase-update.sql` 사용
+- "check constraint" 오류가 나면 `supabase-category-update.sql` 실행 필요
 - 기존 정책을 자동으로 삭제하고 재생성합니다
 
 ### 5. Storage 버킷 생성 및 정책 설정
