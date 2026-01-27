@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Asset } from '../types';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
-import { generateId, uploadAssetImage } from '../utils-supabase';
+import { generateId, uploadAssetImage, saveAsset } from '../utils-supabase';
 
 interface AssetFormProps {
   asset?: Asset;
@@ -25,6 +25,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     if (asset) {
@@ -61,6 +62,7 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
+    setErrorMessage(''); // 에러 메시지 초기화
     
     try {
       const assetId = asset?.id || generateId();
@@ -71,6 +73,9 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
         const uploadedUrl = await uploadAssetImage(imageFile, assetId);
         if (uploadedUrl) {
           imageUrl = uploadedUrl;
+        } else {
+          setErrorMessage('이미지 업로드에 실패했습니다. 이미지 없이 계속하시겠습니까?');
+          // 이미지 업로드 실패는 경고만 하고 계속 진행
         }
       }
 
@@ -83,7 +88,16 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
         updatedAt: now,
       };
       
-      onSave(newAsset);
+      const result = await saveAsset(newAsset);
+      
+      if (result.success) {
+        onSave(newAsset);
+      } else {
+        setErrorMessage(result.error || '자산 저장에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      setErrorMessage('예상치 못한 오류가 발생했습니다.');
     } finally {
       setUploading(false);
     }
@@ -115,6 +129,25 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+          {/* 에러 메시지 표시 */}
+          {errorMessage && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg flex items-start gap-2">
+              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-medium text-sm">{errorMessage}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setErrorMessage('')}
+                className="text-red-400 hover:text-red-600 dark:hover:text-red-300"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* 이미지 업로드 섹션 */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

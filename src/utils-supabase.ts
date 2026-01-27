@@ -50,7 +50,7 @@ export const getAssets = async (): Promise<Asset[]> => {
   }));
 };
 
-export const saveAsset = async (asset: Asset): Promise<boolean> => {
+export const saveAsset = async (asset: Asset): Promise<{ success: boolean; error?: string }> => {
   const dbAsset = {
     id: asset.id,
     name: asset.name,
@@ -89,10 +89,34 @@ export const saveAsset = async (asset: Asset): Promise<boolean> => {
 
   if (result.error) {
     console.error('Error saving asset:', result.error);
-    return false;
+    
+    // 에러 타입별로 사용자 친화적인 메시지 생성
+    let errorMessage = '자산 저장에 실패했습니다.';
+    
+    if (result.error.code === '23505') {
+      // Unique constraint violation (시리얼 번호 중복)
+      errorMessage = '이미 등록된 시리얼 번호입니다. 다른 시리얼 번호를 사용해주세요.';
+    } else if (result.error.code === '23503') {
+      // Foreign key violation
+      errorMessage = '참조 무결성 오류가 발생했습니다.';
+    } else if (result.error.code === '23502') {
+      // Not null violation (필수 필드 누락)
+      const field = result.error.message.match(/column "(.+?)"/)?.[1];
+      errorMessage = field 
+        ? `필수 항목이 누락되었습니다: ${field}` 
+        : '필수 항목을 모두 입력해주세요.';
+    } else if (result.error.message.includes('timeout')) {
+      errorMessage = '서버 응답 시간이 초과되었습니다. 다시 시도해주세요.';
+    } else if (result.error.message.includes('network')) {
+      errorMessage = '네트워크 연결을 확인해주세요.';
+    } else if (result.error.message) {
+      errorMessage = `저장 오류: ${result.error.message}`;
+    }
+    
+    return { success: false, error: errorMessage };
   }
   
-  return true;
+  return { success: true };
 };
 
 export const deleteAsset = async (id: string): Promise<boolean> => {

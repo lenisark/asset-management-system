@@ -46,8 +46,13 @@ const TransactionForm = ({ asset, onComplete, onCancel }: TransactionFormProps) 
       updatedAt: new Date().toISOString(),
     };
     
-    await saveAsset(updatedAsset);
-    onComplete();
+    const result = await saveAsset(updatedAsset);
+    
+    if (result.success) {
+      onComplete();
+    } else {
+      alert(result.error || '자산 상태 업데이트에 실패했습니다.');
+    }
   };
 
   const handleChange = (

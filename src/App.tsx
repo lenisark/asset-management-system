@@ -93,13 +93,13 @@ function App() {
 
   const handleSaveAsset = async (asset: Asset) => {
     try {
-      const success = await saveAsset(asset);
-      if (success) {
+      const result = await saveAsset(asset);
+      if (result.success) {
         await loadAssets();
         setShowAssetForm(false);
         setSelectedAsset(undefined);
       } else {
-        alert('자산 저장에 실패했습니다.');
+        alert(result.error || '자산 저장에 실패했습니다.');
       }
     } catch (err) {
       console.error('Error saving asset:', err);
