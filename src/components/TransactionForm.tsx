@@ -34,10 +34,15 @@ const TransactionForm = ({ asset, onComplete, onCancel }: TransactionFormProps) 
     
     await saveTransaction(transaction);
     
-    // 자산 상태 업데이트
+    // 자산 상태 및 위치 업데이트
     const updatedAsset: Asset = {
       ...asset,
       status: type === 'checkout' ? 'in-use' : 'available',
+      // 불출 시: "담당자명 (부서)" 형식으로 위치 업데이트
+      // 입고 시: 원래 위치 유지 (또는 빈 문자열로)
+      location: type === 'checkout' 
+        ? `${formData.employeeName} (${formData.department})` 
+        : asset.location,
       updatedAt: new Date().toISOString(),
     };
     

@@ -285,16 +285,15 @@ const AssetForm = ({ asset, onSave, onCancel }: AssetFormProps) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                위치 <span className="text-red-500">*</span>
+                위치
               </label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="예: 본사 3층 개발팀"
+                placeholder="예: 본사 3층 개발팀 (선택사항)"
               />
             </div>
           </div>
